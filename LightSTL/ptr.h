@@ -1,6 +1,6 @@
 #ifndef PTR_H
 #define PTR_H
-
+#include <atomic>
 template<typename T>
 struct default_delete {
 	constexpr default_delete() noexcept = default;
@@ -165,18 +165,21 @@ public:
 
 	unique_ptr(const unique_ptr&) = delete;
 
-	unique_ptr(unique_ptr&& u)noexcept 
+	template<typename U>
+	unique_ptr(unique_ptr<U>&& u)noexcept 
 		:ptr(u.ptr), deleter(u.deleter) {}
 
 	unique_ptr& operator =(const unique_ptr&) = delete;
 
-	unique_ptr& operator =(unique_ptr&& u)noexcept {
+	template<typename U>
+	unique_ptr<T>& operator =(unique_ptr<U>&& u)noexcept {
 		if (&u == this)
 			return;
 		FREE();
 		ptr = u.ptr;
 		deleter = u.deleter;
 		u.ptr = nullptr;
+		return *this;
 	}
 
 	unique_ptr& operator =(nullptr_t)noexcept {
@@ -271,31 +274,67 @@ void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept {
 	lhs.swap(rhs);
 }
 
-namespace {
-	template<typename T,typename Deleter = default_delete<T>>
-	struct PTR {
-		T* ptr;
-		int cnt;
-		Deleter deleter;
-		PTR() noexcept
-			:ptr(nullptr), cnt(1) {}
 
-		PTR(nullptr_t) noexcept
-			:ptr(nullptr), cnt(1) {}
+struct ref_block_base {
+	virtual ~ref_block_base()noexcept {}
+};
 
-		PTR(T* p) noexcept
-			:ptr(p), cnt(1) {}
+template<typename T,typename Deleter = default_delete<T>>
+struct ref_block :public ref_block_base {
+	T* ptr;
+	std::atomic<size_t>shared_cnt;
+	std::atomic<size_t>weak_cnt;
+	Deleter deleter;
 
-		~PTR() noexcept {}
-	};
+	ref_block() 
+		:ptr(nullptr), shared_cnt(1), weak_cnt(0) {}
 
-	template<typename T,typename Deleter>
-	struct PTR<T[],Deleter>{
-		T* ptr;
-		int cnt;
+	ref_block(nullptr_t)
+		:ptr(nullptr), shared_cnt(1), weak_cnt(0) {}
 
-	};
-}
+	ref_block(T* p)
+		:ptr(p), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(T* p, const Deleter& d)
+		:ptr(p), deleter(d), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(const ref_block&) = delete;
+
+	ref_block(ref_block&&) = delete;
+
+	ref_block& operator=(const ref_block) = delete;
+
+	~ref_block() noexcept {}
+};
+	
+template<typename T,typename Deleter>
+struct ref_block<T[], Deleter> :public ref_block_base {
+	T* ptr;
+	std::atomic<size_t>shared_cnt;
+	std::atomic<size_t>weak_cnt;
+	Deleter deleter;
+
+	ref_block() 
+		:ptr(nullptr), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(nullptr_t) 
+		:ptr(nullptr), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(T* p) 
+		:ptr(p), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(T* p, const Deleter& d)
+		:ptr(p), deleter(d), shared_cnt(1), weak_cnt(0) {}
+
+	ref_block(const ref_block&) = delete;
+
+	ref_block(ref_block&&) = delete;
+
+	ref_block& operator=(const ref_block) = delete;
+
+	~ref_block() noexcept {}
+};
+
 template<typename T>
 class shared_ptr {
 public:
@@ -303,10 +342,18 @@ public:
 
 	constexpr shared_ptr(nullptr_t) noexcept {}
 
-	
-private:
-	PTR<T> ptr;
+	template< class Y >
+	explicit shared_ptr(Y* p)
+		:ptr(static<T*>(p)), ref(new ref_block<Y>(static<T*>(p))) {}
 
+	template< class Y, class Deleter >
+	shared_ptr(Y* p, Deleter d)
+		:ptr(static<T*>(p)), ref(new ref_block<T>(static<T*>(p),d)) {}
+
+
+private:
+	T * ptr;
+	ref_block_base* ref;
 };
 
 template<typename T>

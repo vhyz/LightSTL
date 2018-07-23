@@ -15,23 +15,18 @@ public:
 };
 
 class B :public A {
-
+public:
+	~B() {
+		std::cout << "~B\n";
+	}
 };
+
 
 int main() {
 	{
-		unique_ptr<A>pa;
-		{
-			unique_ptr<A>pb(new A());
-			pa = std::move(pb);
-			std::cout << "Leave\n";
-		}
-		unique_ptr<A>pb(new B());
-		pa = std::move(pb);
-		std::vector<int>();
+		std::shared_ptr<B>a(new B());
+		std::shared_ptr<A>b = a;
 	}
-	B*b;
-	//A*a = b;
-	
+	std::
 	system("pause");
 }
