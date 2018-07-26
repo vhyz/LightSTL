@@ -13,17 +13,35 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\smart_ptr">
+      <UniqueIdentifier>{3a5e57bb-c310-4e0d-b43c-6a1555356f6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\smart_ptr\detail">
+      <UniqueIdentifier>{8ef5cf5d-a7c9-45f6-8e31-e2df6a800e0a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="allocator.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="ptr.h">
+    <ClInclude Include="smart_ptr\detail\deleter.hpp">
+      <Filter>头文件\smart_ptr\detail</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_ptr\unique_ptr.hpp">
+      <Filter>头文件\smart_ptr</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_ptr\shared_ptr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_ptr\detail\ref_count.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="smart_ptr\weak_ptr.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

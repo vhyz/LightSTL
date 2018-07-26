@@ -116,10 +116,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="allocator.h" />
-    <ClInclude Include="ptr.h" />
+    <ClInclude Include="smart_ptr\detail\deleter.hpp" />
+    <ClInclude Include="smart_ptr\detail\ref_count.hpp" />
+    <ClInclude Include="smart_ptr\weak_ptr.hpp" />
+    <ClInclude Include="smart_ptr\shared_ptr.hpp" />
+    <ClInclude Include="smart_ptr\unique_ptr.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="test.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
