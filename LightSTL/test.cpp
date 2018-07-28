@@ -6,24 +6,32 @@
 #include<ctime>
 #include"smart_ptr/shared_ptr.hpp"
 #include"smart_ptr/unique_ptr.hpp"
+#include"smart_ptr/weak_ptr.hpp"
+#include<memory>
+#include<string>
 
 using std::cout;
 using std::endl;
-
+using std::string;
 class A {
 public:
 	~A() {
-		cout << "~A";
+		cout << "~A\n";
 	}
 };
 
 int main() {
+	
 	{
-		unique_ptr<A[]> a(new A[3]());
-		shared_ptr<A>b(new A());
-		shared_ptr<A>c(b);
-		shared_ptr<A>d(b);
-		cout << b.use_count();
+		weak_ptr<A>wp;
+		{
+			std::cout << "enter block\n";
+			shared_ptr<A[]>a(new A[3]());
+			shared_ptr<A>b = make_shared<A>();
+			wp = b;
+		}
+		std::cout << "leave block\n";
 	}
+
 	system("pause");
 }

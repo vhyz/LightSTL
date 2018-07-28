@@ -5,6 +5,10 @@
 template<typename T, typename Deleter = default_delete<T>>
 class unique_ptr {
 public:
+	using pointer = T * ;
+	using element_type = T;
+	using deleter_type = Deleter;
+
 	constexpr unique_ptr() noexcept
 		:ptr(nullptr) {
 	}

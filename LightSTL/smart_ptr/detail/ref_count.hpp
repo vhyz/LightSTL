@@ -1,13 +1,14 @@
 #ifndef REF_COUNT_HPP
 #define REF_COUNT_HPP
 #include<atomic>
-
-class ref_block_base {
+#include"deleter.hpp"
+#include<iostream>
+class ref_count_base {
 private:
 	std::atomic<size_t>shared_cnt;
 	std::atomic<size_t>weak_cnt;
 public:
-	ref_block_base()noexcept
+	ref_count_base()noexcept
 		:shared_cnt(1), weak_cnt(1) {
 	}
 
@@ -35,86 +36,97 @@ public:
 		return weak_cnt.load();
 	}
 
-	virtual ~ref_block_base()noexcept {}
+	virtual ~ref_count_base()noexcept {}
 	virtual void* get_deleter() = 0;
 	virtual void release() = 0;
+	virtual void destory() = 0;
 };
 
 template<typename T, typename Deleter = default_delete<T>>
-struct ref_block :public ref_block_base {
+struct ref_count :public ref_count_base {
 	T* ptr;
 	Deleter deleter;
 
-	ref_block()
-		:ptr(nullptr), ref_block_base() {
+	ref_count()
+		:ptr(nullptr), ref_count_base() {
 	}
 
-	ref_block(nullptr_t)
-		:ptr(nullptr), ref_block_base() {
+	ref_count(nullptr_t)
+		:ptr(nullptr), ref_count_base() {
 	}
 
-	ref_block(T* p)
-		:ptr(p), ref_block_base() {
+	ref_count(T* p)
+		:ptr(p), ref_count_base() {
 	}
 
-	ref_block(T* p, const Deleter& d)
-		:ptr(p), deleter(d), ref_block_base() {
+	ref_count(T* p, const Deleter& d)
+		:ptr(p), deleter(d), ref_count_base() {
 	}
 
-	ref_block(const ref_block&) = delete;
+	ref_count(const ref_count&) = delete;
 
-	ref_block(ref_block&&) = delete;
+	ref_count(ref_count&&) = delete;
 
-	ref_block& operator=(const ref_block) = delete;
+	ref_count& operator=(const ref_count) = delete;
 
-	~ref_block() noexcept {}
+	~ref_count() noexcept {}
 
 	void* get_deleter()override {
 		return &deleter;
 	}
 
-	void release()override {
+	virtual void release()override {
 		deleter(ptr);
 		ptr = nullptr;
+	}
+
+	void destory()override {
+		delete this;
+		std::cout << "deleter ref\n";
 	}
 };
 
 template<typename T, typename Deleter>
-struct ref_block<T[], Deleter> :public ref_block_base {
+struct ref_count<T[], Deleter> :public ref_count_base {
 	T* ptr;
 	Deleter deleter;
 
-	ref_block()
-		:ptr(nullptr), ref_block_base() {
+	ref_count()
+		:ptr(nullptr), ref_count_base() {
 	}
 
-	ref_block(nullptr_t)
-		:ptr(nullptr), ref_block_base() {
+	ref_count(nullptr_t)
+		:ptr(nullptr), ref_count_base() {
 	}
 
-	ref_block(T* p)
-		:ptr(p), ref_block_base() {
+	ref_count(T* p)
+		:ptr(p), ref_count_base() {
 	}
 
-	ref_block(T* p, const Deleter& d)
-		:ptr(p), deleter(d), ref_block_base() {
+	ref_count(T* p, const Deleter& d)
+		:ptr(p), deleter(d), ref_count_base() {
 	}
 
-	ref_block(const ref_block&) = delete;
+	ref_count(const ref_count&) = delete;
 
-	ref_block(ref_block&&) = delete;
+	ref_count(ref_count&&) = delete;
 
-	ref_block& operator=(const ref_block&) = delete;
+	ref_count& operator=(const ref_count&) = delete;
 
-	~ref_block() noexcept {}
+	~ref_count() noexcept {}
 
-	inline void* get_deleter()override {
+	void* get_deleter()override {
 		return &deleter;
 	}
 
-	void release()override {
+	virtual void release()override {
 		deleter(ptr);
 		ptr = nullptr;
+	}
+
+	void destory() override {
+		delete this;
+		std::cout << "deleter ref\n";
 	}
 };
 
