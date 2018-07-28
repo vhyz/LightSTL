@@ -3,6 +3,13 @@
 #include<atomic>
 #include"deleter.hpp"
 #include<iostream>
+
+namespace LightSTL{
+
+
+namespace detail {
+
+
 class ref_count_base {
 private:
 	std::atomic<size_t>shared_cnt;
@@ -130,4 +137,7 @@ struct ref_count<T[], Deleter> :public ref_count_base {
 	}
 };
 
+}
+
+}
 #endif // !REF_COUNT_HPP

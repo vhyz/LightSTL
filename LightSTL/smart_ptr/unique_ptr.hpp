@@ -2,6 +2,8 @@
 #define UNIQUE_PTR_HPP
 #include"detail/deleter.hpp"
 
+namespace LightSTL {
+
 template<typename T, typename Deleter = default_delete<T>>
 class unique_ptr {
 public:
@@ -244,5 +246,7 @@ bool operator!=(nullptr_t, const unique_ptr<T, D>& x) noexcept {
 template< class T, class Deleter >
 void swap(unique_ptr<T, Deleter>& lhs, unique_ptr<T, Deleter>& rhs) noexcept {
 	lhs.swap(rhs);
+}
+
 }
 #endif // !UNIQUE_PTR_HPP

@@ -3,13 +3,16 @@
 
 //标准规定的多线程原子操作函数暂时没有写，而C++20中 std::atomic<std::shared_ptr>代替了这些操作
 
-
 #include"detail/ref_count.hpp"
 #include<type_traits>
 #include<iostream>
 
+namespace LightSTL {
+
+
 template<typename T>class weak_ptr;
 template<typename T,typename Deleter>class unique_ptr;
+template<typename T>class enable_shared_from_this;
 
 template<typename T>
 class shared_ptr {
@@ -33,27 +36,34 @@ public:
 
 	template<typename Y>
 	explicit shared_ptr(Y* p)
-		: ptr(p), ref(new ref_count<std::conditional_t<std::is_array_v<T>,Y[],Y>>(p)) {}
+		: ptr(p), ref(new detail::ref_count<std::conditional_t<std::is_array_v<T>, Y[], Y>>(p)) {
+		_shared_from_this(p);
+	}
 
 	template<typename Y, typename Deleter>
 	shared_ptr(Y* p, Deleter d)
-		: ptr(p), ref(new ref_count<std::conditional_t<std::is_array_v<T>, Y[], Y>>(p)) {}
+		: ptr(p), ref(new detail::ref_count<std::conditional_t<std::is_array_v<T>, Y[], Y>>(p, d)) {
+		_shared_from_this(p);
+	}
 
 	template<typename Y>
 	shared_ptr(const shared_ptr<Y>& r)noexcept
 		: ptr(r.ptr), ref(r.ref) {
-		ref->add_shared_ptr();
+		if(ref)
+			ref->add_shared_ptr();
 	}
 
 	shared_ptr(const shared_ptr&r)noexcept
 		: ptr(r.ptr), ref(r.ref) {
-		ref->add_shared_ptr();
+		if(ref)
+			ref->add_shared_ptr();
 	}
 
 	template<typename Y>
 	shared_ptr(const shared_ptr<Y>&r, element_type* p)noexcept
 		: ptr(p), ref(r.ref) {
-		ref->add_shared_ptr();
+		if(ref)
+			ref->add_shared_ptr();
 	}
 
 	shared_ptr(shared_ptr&& r)noexcept
@@ -71,7 +81,7 @@ public:
 
 	template<typename Y>
 	explicit shared_ptr(const weak_ptr<Y>& r)
-		: ptr(static_cast<T*>(r.ptr)), ref(r.ref) {
+		: ptr(r.ptr), ref(r.ref) {
 		if (ref)
 			ref->add_shared_ptr();
 	}
@@ -90,7 +100,8 @@ public:
 		FREE();
 		ptr = r.ptr;
 		ref = r.ref;
-		r.ref->add_shared_ptr();
+		if(ref)
+			ref->add_shared_ptr();
 		return *this;
 	}
 
@@ -101,7 +112,8 @@ public:
 		FREE();
 		ptr = r.ptr;
 		ref = r.ref;
-		r.ref->add_shared_ptr();
+		if(ref)
+			rref->add_shared_ptr();
 		return *this;
 	}
 
@@ -127,9 +139,8 @@ public:
 	template<typename Y, typename Deleter>
 	shared_ptr& operator=(unique_ptr<Y, Deleter>&& r) {
 		FREE();
-		ptr = static_cast<T*>(r.get());
-		ref = new ref_count<Y, Deleter>(ptr, r.get_deleter());
-		r.release();
+		ptr = static_cast<T*>(r.release());
+		ref = new detail::ref_count<Y, Deleter>(ptr, r.get_deleter());
 		return *this;
 	}
 
@@ -143,20 +154,20 @@ public:
 	void reset(Y* p) {
 		FREE();
 		ptr = static_cast<T*>(p);
-		ref = new ref_count<Y>(p);
+		ref = new detail::ref_count<std::conditional_t<std::is_array_v<T>, Y[], Y>>(p);
 	}
 
 	template<typename Y, typename Deleter>
 	void reset(Y* p, Deleter d) {
 		FREE();
 		ptr = p;
-		ref = new ref_count<Y, Deleter>(p, d);
+		ref = new detail::ref_count<std::conditional_t<std::is_array_v<T>, Y[], Y>>(p, d);
 	}
 
 	void swap(shared_ptr& r) {
 		element_type* p = r.ptr;
 		r.ptr = ptr;
-		ptr = tmp;
+		ptr = p;
 
 		ref_count_base* t = r.ref;
 		r.ref = ref;
@@ -201,7 +212,8 @@ public:
 
 private:
 	element_type * ptr;
-	ref_count_base* ref;
+	detail::ref_count_base* ref;
+
 	void FREE() {
 		if (ref) {
 			ref->sub_shared_ptr();
@@ -213,6 +225,14 @@ private:
 				ref->destory();
 			}
 		}
+	}
+
+	template<typename Y, std::enable_if_t<!std::is_base_of_v<enable_shared_from_this<Y>, Y>, int> = 0>
+	void _shared_from_this(Y* p) {}
+
+	template<typename Y, std::enable_if_t<std::is_base_of_v<enable_shared_from_this<Y>,Y>,int> = 0>
+		void _shared_from_this(Y* p) {
+			p->_internal_accept_owner(*this);
 	}
 };
 
@@ -335,6 +355,6 @@ std::basic_ostream<U, V>& operator<<(std::basic_ostream<U, V>& os, const std::sh
 }
 
 
-
+}
 
 #endif // !SHARED_PTR_HPP

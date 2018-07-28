@@ -3,6 +3,10 @@
 #include"detail/ref_count.hpp"
 #include<type_traits>
 #include"shared_ptr.hpp"
+
+namespace LightSTL {
+
+
 template<typename T>
 class weak_ptr {
 	template<typename Y>
@@ -134,7 +138,7 @@ public:
 	}
 private:
 	element_type* ptr;
-	ref_count_base* ref;
+	detail::ref_count_base* ref;
 	void FREE() {
 		if (ref) {
 			ref->sub_weak_ptr();
@@ -148,5 +152,7 @@ private:
 template< class T >
 void swap(weak_ptr<T>& lhs, weak_ptr<T>& rhs) noexcept {
 	lhs.swap(rhs);
+}
+
 }
 #endif // !WEAK_PRT_HPP

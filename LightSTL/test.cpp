@@ -7,6 +7,7 @@
 #include"smart_ptr/shared_ptr.hpp"
 #include"smart_ptr/unique_ptr.hpp"
 #include"smart_ptr/weak_ptr.hpp"
+#include"smart_ptr/enable_shared_from_this.hpp"
 #include<memory>
 #include<string>
 
@@ -20,18 +21,31 @@ public:
 	}
 };
 
+class B :public LightSTL::enable_shared_from_this<B> {
+public:
+	~B() {
+		cout << "~B\n";
+	}
+};
+
 int main() {
 	
 	{
-		weak_ptr<A>wp;
+		LightSTL::weak_ptr<A>wp;
 		{
 			std::cout << "enter block\n";
-			shared_ptr<A[]>a(new A[3]());
-			shared_ptr<A>b = make_shared<A>();
+			LightSTL::shared_ptr<A[]>a(new A[3]());
+			LightSTL::shared_ptr<A>b = LightSTL::make_shared<A>();
 			wp = b;
 		}
 		std::cout << "leave block\n";
 	}
 
+
+	{
+		LightSTL::shared_ptr<B>a(new B());
+		LightSTL::shared_ptr<B>b = a->shared_from_this();
+		cout << a.use_count();
+	}
 	system("pause");
 }

@@ -1,6 +1,9 @@
 #ifndef DELETER_HPP
 #define DELETER_HPP
 
+namespace LightSTL {
+
+
 template<typename T>
 struct default_delete {
 	constexpr default_delete() noexcept = default;
@@ -42,4 +45,5 @@ struct default_delete<T[]> {
 	~default_delete() = default;
 };
 
+}
 #endif // !DELETER_HPP

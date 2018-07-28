@@ -39,6 +39,9 @@
     <ClInclude Include="smart_ptr\weak_ptr.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="smart_ptr\enable_shared_from_this.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
