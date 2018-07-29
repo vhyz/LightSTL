@@ -21,9 +21,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="allocator.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="smart_ptr\detail\deleter.hpp">
       <Filter>头文件\smart_ptr\detail</Filter>
     </ClInclude>
@@ -40,6 +37,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="smart_ptr\enable_shared_from_this.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\uninitialized_storage.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

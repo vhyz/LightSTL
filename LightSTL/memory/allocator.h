@@ -2,6 +2,8 @@
 #include<cstddef>  //std::size_t , std::ptrdiff_t
 #include<new>
 
+namespace LightSTL{
+
 template<typename T>
 class allocator {
 public:
@@ -49,3 +51,5 @@ public:
 	}
 
 };
+
+}
