@@ -1,4 +1,4 @@
-#ifndef ENABLE_SHARED_FROM_THIS_HPP
+ï»¿#ifndef ENABLE_SHARED_FROM_THIS_HPP
 #define ENABLE_SHARED_FROM_THIS_HPP
 #include"shared_ptr.hpp"
 #include"weak_ptr.hpp"
@@ -35,7 +35,7 @@ public:
 	}
 
 
-	//½öÓÉshared_ptrµ÷ÓÃ
+	//ä»…ç”±shared_ptrè°ƒç”¨
 	template<typename X> void _internal_accept_owner(const shared_ptr<X>& sp) const {
 		if (weak_this_.expired()) {
 			weak_this_ = sp;

@@ -1,4 +1,4 @@
-#ifndef DELETER_HPP
+﻿#ifndef DELETER_HPP
 #define DELETER_HPP
 
 namespace LightSTL {

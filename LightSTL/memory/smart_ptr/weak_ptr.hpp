@@ -1,4 +1,4 @@
-#ifndef WEAK_PRT_HPP
+﻿#ifndef WEAK_PRT_HPP
 #define WEAK_PRT_HPP
 #include"detail/ref_count.hpp"
 #include<type_traits>

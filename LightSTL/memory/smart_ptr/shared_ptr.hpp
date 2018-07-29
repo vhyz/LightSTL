@@ -1,7 +1,7 @@
-#ifndef SHARED_PTR_HPP
+ï»¿#ifndef SHARED_PTR_HPP
 #define SHARED_PTR_HPP
 
-//±ê×¼¹æ¶¨µÄ¶àÏß³ÌÔ­×Ó²Ù×÷º¯ÊıÔİÊ±Ã»ÓĞĞ´£¬¶øC++20ÖĞ std::atomic<std::shared_ptr>´úÌæÁËÕâĞ©²Ù×÷
+//æ ‡å‡†è§„å®šçš„å¤šçº¿ç¨‹åŸå­æ“ä½œå‡½æ•°æš‚æ—¶æ²¡æœ‰å†™ï¼Œè€ŒC++20ä¸­ std::atomic<std::shared_ptr>ä»£æ›¿äº†è¿™äº›æ“ä½œ
 
 #include"detail/ref_count.hpp"
 #include<type_traits>
@@ -238,9 +238,9 @@ private:
 
 template<typename T, typename... Args>  
 shared_ptr<T> make_shared(Args&&... args) {
-	//T²»ÊÇÊı×éÀàĞÍ
+	//Tä¸æ˜¯æ•°ç»„ç±»å‹
 	
-	//C++±ê×¼ÍÆ¼öÒ»´Î·ÖÅä£¬ÕâÀïÖ»½øĞĞÁ½´Î·ÖÅäÄÚ´æµÄ·½Ê½£¬Ê¹ÓÃstd::forward½øĞĞÍêÃÀ×ª·¢
+	//C++æ ‡å‡†æ¨èä¸€æ¬¡åˆ†é…ï¼Œè¿™é‡Œåªè¿›è¡Œä¸¤æ¬¡åˆ†é…å†…å­˜çš„æ–¹å¼ï¼Œä½¿ç”¨std::forwardè¿›è¡Œå®Œç¾è½¬å‘
 
 	T* p = new T(std::forward<Args>(args)...);
 	shared_ptr<T>res(p);

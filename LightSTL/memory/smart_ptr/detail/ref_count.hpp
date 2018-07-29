@@ -1,4 +1,4 @@
-#ifndef REF_COUNT_HPP
+﻿#ifndef REF_COUNT_HPP
 #define REF_COUNT_HPP
 #include<atomic>
 #include"deleter.hpp"
