@@ -1,5 +1,4 @@
-﻿#include<vector>
-#include<queue>
+﻿#include<queue>
 #include<memory>
 #include"memory/allocator.h"
 #include<iostream>
@@ -8,8 +7,8 @@
 #include"memory/smart_ptr/unique_ptr.hpp"
 #include"memory/smart_ptr/weak_ptr.hpp"
 #include"memory/smart_ptr/enable_shared_from_this.hpp"
-#include<memory>
-#include<string>
+#include"test/addressof_test.hpp"
+#include<vector>
 
 using std::cout;
 using std::endl;
@@ -27,6 +26,8 @@ public:
 		cout << "~B\n";
 	}
 };
+
+
 
 int main() {
 	
@@ -48,5 +49,15 @@ int main() {
 		cout << a.use_count();
 	}
     
+
+	{
+		addressof_test();
+	}
+
+
+	{
+		std::vector<int>a = { 1,1,1 };
+		std::cout << a.size();
+	}
 	system("pause");
 }

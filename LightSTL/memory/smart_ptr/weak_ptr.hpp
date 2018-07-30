@@ -108,8 +108,12 @@ public:
 	}
 
 	void swap(weak_ptr& r)noexcept {
-		ptr = r.ptr;
-		ref = r.ref;
+		element_type* tmp_ptr = r.ptr;
+		detail::ref_count_base* tmp_ref = r.ref;
+		r.ptr = ptr;
+		r.ref = ref;
+		ptr = tmp_ptr;
+		ref = tmp_ref;
 	}
 
 	long use_count() const noexcept {

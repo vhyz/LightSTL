@@ -115,6 +115,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="iterator\iterator.hpp" />
+    <ClInclude Include="iterator\iterator_traits.hpp" />
+    <ClInclude Include="memory\addressof.hpp" />
     <ClInclude Include="memory\uninitialized_storage.hpp" />
     <ClInclude Include="smart_ptr\detail\deleter.hpp" />
     <ClInclude Include="smart_ptr\detail\ref_count.hpp" />
@@ -122,6 +125,8 @@
     <ClInclude Include="smart_ptr\weak_ptr.hpp" />
     <ClInclude Include="smart_ptr\shared_ptr.hpp" />
     <ClInclude Include="smart_ptr\unique_ptr.hpp" />
+    <ClInclude Include="test\addressof_test.hpp" />
+    <ClInclude Include="vector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp" />

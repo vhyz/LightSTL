@@ -1,6 +1,7 @@
 ﻿#pragma once 
 #include<cstddef>  //std::size_t , std::ptrdiff_t
 #include<new>
+#include"addressof.hpp"
 
 namespace LightSTL{
 
@@ -23,10 +24,10 @@ public:
 	~allocator() {}
 
 	T* address(T& x)const {
-		return &x;
+		return addressof(x);
 	}
-	T* address(const T& x)const {
-		return &x;
+	const T* address(const T& x)const {
+		return addressof(x);
 	}
 
 	T* allocate(std::size_t n = 1) {
@@ -45,7 +46,9 @@ public:
 	void construct(T* ptr, const T& val) {
 		new (ptr) T(val);
 	}
-
+	void construct(T* ptr, T&& val) {
+		new (ptr) T(val);
+	}
 	void destory(T* ptr) {
 		ptr->~T();
 	}
