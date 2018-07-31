@@ -40,16 +40,16 @@ public:
 		::operator delete (ptr++);
 	}
 
-	void construct(T* ptr) {
+	inline void construct(T* ptr) {
 		new (ptr) T();
 	}
-	void construct(T* ptr, const T& val) {
+	inline void construct(T* ptr, const T& val) {
 		new (ptr) T(val);
 	}
-	void construct(T* ptr, T&& val) {
+	inline void construct(T* ptr, T&& val) {
 		new (ptr) T(val);
 	}
-	void destory(T* ptr) {
+	inline void destory(T* ptr) {
 		ptr->~T();
 	}
 

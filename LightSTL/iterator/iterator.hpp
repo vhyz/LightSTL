@@ -28,7 +28,7 @@ template<
 	using pointer = Pointer;
 	using reference = Reference;
 };
-
+/*
 template< class Iterator >
 class reverse_iterator : public iterator<input_iterator_tag,Iterator> {
 public:
@@ -66,6 +66,6 @@ protected:
 	Iterator current;
 };
 
-
+*/
 }
 #endif // !ITERATOR_HPP

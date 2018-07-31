@@ -2,7 +2,7 @@
 #define ADDRESSOF_HPP
 
 
-//下面的实现为boost中的实现
+//下面的实现为boost中的简化实现
 namespace LightSTL {
 
 

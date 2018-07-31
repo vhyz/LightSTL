@@ -126,6 +126,7 @@
     <ClInclude Include="smart_ptr\shared_ptr.hpp" />
     <ClInclude Include="smart_ptr\unique_ptr.hpp" />
     <ClInclude Include="test\addressof_test.hpp" />
+    <ClInclude Include="test\test_uninitialized_storage.hpp" />
     <ClInclude Include="vector.hpp" />
   </ItemGroup>
   <ItemGroup>

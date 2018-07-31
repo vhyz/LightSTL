@@ -1,17 +1,17 @@
 ﻿#ifndef ITERATOR_TRAITS_HPP
 #define ITERATOR_TRAITS_HPP
-
+#include"iterator.hpp"
 
 
 namespace LightSTL {
 
 template< class Iterator >
 struct iterator_traits {
-	using difference_type = Iterator::difference_type;
-	using value_type = Iterator::value_type;
-	using pointer = Iterator::pointer;
-	using reference = Iterator::reference;
-	using iterator_category = Iterator::iterator_category;
+	using difference_type = typename Iterator::difference_type;
+	using value_type = typename Iterator::value_type;
+	using pointer = typename Iterator::pointer;
+	using reference = typename Iterator::reference;
+	using iterator_category = typename Iterator::iterator_category;
 };
 
 template< class T >
