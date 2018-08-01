@@ -170,16 +170,16 @@ public:
 	}
 
 public:
-	//成员函数
-	size_type size()const {
+	//
+	size_type size()const { 
 		return finish - start;
 	}
 
-	size_type capacity()const {
+	size_type capacity()const { 
 		return end_of_storage - start;
 	}
 
-	allocator_type get_allocator() const {
+	allocator_type get_allocator() const { 
 		return data_alloc;
 	}
 
@@ -325,10 +325,15 @@ public:
 
 	}
 	iterator erase(const_iterator pos) {
-
+		erase(pos, pos + 1);
 	}
 	iterator erase(const_iterator first, const_iterator last) {
-
+		for (; first < last; ++first)
+			first->T();
+		if (last != finish)
+			finish = LightSTL::uninitialized_move(last, finish, first);
+		else
+			finish = first;
 	}
 
 	void push_back(const T& value) {
@@ -343,18 +348,34 @@ public:
 	template< class... Args >
 	reference emplace_back(Args&&... args) {
 		chk_n_alloc();
-		data_alloc.construct(std::forward<Args>(args)...);
+		data_alloc.construct(finish++, std::forward<Args>(args)...);
+		return *(finish - 1);
 	}
 
 	void pop_back() {
-
+		data_alloc.destory(finish - 1);
+		finish--;
 	}
 
 	void resize(size_type count) {
-
+		T value;
+		resize(count, value);
 	}
 	void resize(size_type count, const value_type& value) {
+		if (count > capacity()) {
+			auto res = alloc_n_move(start, finish, count);
+			start = res.first;
+			finish = res.second;
+			end_of_storage = start + count;
+		}
 
+		if (count > size()) {
+			LightSTL::uninitialized_fill_n(finish, count - size(), value);
+		} else {
+			size_type len = size() - count;
+			for (size_type i = 0; i < len; ++i)
+				data_alloc.destory(finish--);
+		}
 	}
 };
 
