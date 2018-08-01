@@ -81,6 +81,9 @@
     <ClInclude Include="memory\smart_ptr\unique_ptr.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="memory\allocator_traits.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">

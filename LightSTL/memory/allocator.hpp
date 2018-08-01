@@ -44,14 +44,9 @@ public:
 		::operator delete (ptr++);
 	}
 
-	inline void construct(T* ptr) {
-		new (ptr) T();
-	}
-	inline void construct(T* ptr, const T& val) {
-		new (ptr) T(val);
-	}
-	inline void construct(T* ptr, T&& val) {
-		new (ptr) T(val);
+	template<class... Args>
+	inline void construct(T* ptr, Args&&... args) {
+		new (ptr) T(std::forward<Args>(args)...);
 	}
 	inline void destory(T* ptr) {
 		ptr->~T();

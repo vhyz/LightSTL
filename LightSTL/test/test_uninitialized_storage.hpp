@@ -2,7 +2,7 @@
 #define TEST_UNINITIALIZED_STORAGE_HPP
 #include <iostream>
 #include"../memory/uninitialized_storage.hpp"
-#include"../memory/allocator.h"
+#include"../memory/allocator.hpp"
 #include<cassert>
 
 namespace test {

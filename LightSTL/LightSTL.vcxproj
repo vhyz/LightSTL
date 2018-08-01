@@ -119,6 +119,7 @@
     <ClInclude Include="iterator\iterator_traits.hpp" />
     <ClInclude Include="memory\addressof.hpp" />
     <ClInclude Include="memory\allocator.hpp" />
+    <ClInclude Include="memory\allocator_traits.hpp" />
     <ClInclude Include="memory\smart_ptr\detail\deleter.hpp" />
     <ClInclude Include="memory\smart_ptr\detail\ref_count.hpp" />
     <ClInclude Include="memory\smart_ptr\enable_shared_from_this.hpp" />

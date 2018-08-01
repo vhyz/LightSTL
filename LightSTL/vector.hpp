@@ -5,7 +5,7 @@
 #include<utility>
 #include"iterator/iterator.hpp"
 #include"memory/uninitialized_storage.hpp"
-#include"memory/allocator.h"
+#include"memory/allocator.hpp"
 #include<initializer_list>
 #include<type_traits>
 #include<cassert>	
@@ -304,11 +304,7 @@ public:
 	}
 
 	iterator insert(const_iterator pos, const T& value) {
-		if (pos == finish) {
-			data_alloc.construct()
-		} else {
 
-		}
 	}
 	iterator insert(const_iterator pos, T&& value) {
 
@@ -336,15 +332,18 @@ public:
 	}
 
 	void push_back(const T& value) {
-
+		chk_n_alloc();
+		data_alloc.construct(finish++, value);
 	}
 	void push_back(T&& value) {
-
+		chk_n_alloc();
+		data_alloc.construct(finish++, std::move(value));
 	}
 
 	template< class... Args >
 	reference emplace_back(Args&&... args) {
-
+		chk_n_alloc();
+		data_alloc.construct(std::forward<Args>(args)...);
 	}
 
 	void pop_back() {
