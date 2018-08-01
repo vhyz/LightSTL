@@ -60,10 +60,34 @@
     <ClInclude Include="test\test_uninitialized_storage.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="memory\smart_ptr\detail\deleter.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\smart_ptr\detail\ref_count.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\allocator.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\smart_ptr\enable_shared_from_this.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\smart_ptr\shared_ptr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\smart_ptr\weak_ptr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="memory\smart_ptr\unique_ptr.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
 </Project>

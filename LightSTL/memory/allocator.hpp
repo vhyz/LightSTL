@@ -1,7 +1,10 @@
-﻿#pragma once 
+﻿#pragma once
+#pragma once 
 #include<cstddef>  //std::size_t , std::ptrdiff_t
 #include<new>
 #include"addressof.hpp"
+
+
 
 namespace LightSTL{
 

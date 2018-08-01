@@ -1,5 +1,7 @@
 ﻿#ifndef WEAK_PRT_HPP
 #define WEAK_PRT_HPP
+
+
 #include"detail/ref_count.hpp"
 #include<type_traits>
 #include"shared_ptr.hpp"
@@ -53,6 +55,7 @@ public:
 	weak_ptr& operator=(const weak_ptr& r) noexcept {
 		if (this == &r)
 			return *this;
+		FREE();
 		ref = r.ref;
 		ptr = r.ptr;
 		if(ref)
@@ -64,6 +67,7 @@ public:
 	weak_ptr& operator=(const weak_ptr<Y>& r) noexcept {
 		if (this == &r)
 			return *this;
+		FREE();
 		ref = r.ref;
 		ptr = r.ptr;
 		if(ref)
@@ -73,6 +77,7 @@ public:
 
 	template< class Y >
 	weak_ptr& operator=(const shared_ptr<Y>& r) noexcept {
+		FREE();
 		ref = r.ref;
 		ptr = r.ptr;
 		if(ref)
@@ -83,6 +88,7 @@ public:
 	weak_ptr& operator=(weak_ptr&& r) noexcept {
 		if (this == &r)
 			return *this;
+		FREE();
 		ref = r.ref;
 		ptr = r.ptr;
 		r.ref = nullptr;
@@ -94,6 +100,7 @@ public:
 	weak_ptr& operator=(weak_ptr<Y>&& r) noexcept {
 		if (this == &r)
 			return *this;
+		FREE();
 		ref = r.ref;
 		ptr = r.ptr;
 		r.ref = nullptr;
