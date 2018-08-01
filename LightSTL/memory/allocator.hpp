@@ -1,5 +1,6 @@
-﻿#pragma once
-#pragma once 
+﻿#ifndef ALLOCATOR_HPP
+#define ALLOCATOR_HPP
+
 #include<cstddef>  //std::size_t , std::ptrdiff_t
 #include<new>
 #include"addressof.hpp"
@@ -59,3 +60,5 @@ public:
 };
 
 }
+
+#endif // !ALLOCATOR_HPP
