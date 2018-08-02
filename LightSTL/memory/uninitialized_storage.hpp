@@ -115,6 +115,51 @@ std::pair<InputIt, ForwardIt> uninitialized_move_n(InputIt first, Size count, Fo
 }
 
 
+template<class ForwardIt>
+void uninitialized_default_construct(ForwardIt first, ForwardIt last) {
+	using Value = typename std::iterator_traits<ForwardIt>::value_type;
+	ForwardIt current = first;
+	try {
+		for (; current != last; ++current) {
+			::new (static_cast<void*>(addressof(*current))) Value;
+		}
+	} catch (...) {
+		for (; first != last; ++first)
+			first->~Value();
+		throw;
+	}
+}
+
+template<class ForwardIt, class Size>
+ForwardIt uninitialized_default_construct_n(ForwardIt first, Size n) {
+	using T = typename std::iterator_traits<ForwardIt>::value_type;
+	ForwardIt current = first;
+	try {
+		for (; n > 0; (void) ++current, --n) {
+			::new (static_cast<void*>(addressof(*current))) T;
+		}
+		return current;
+	} catch (...) {
+		for (; first != current; ++first)
+			first->~T();
+		throw;
+	}
+}
+template<class ForwardIt, class Size>
+ForwardIt destroy_n(ForwardIt first, Size n) {
+	for (; n > 0; (void) ++first, --n)
+		destroy_at(std::addressof(*first));
+	return first;
+}
+template< class ForwardIt >
+void destroy(ForwardIt first, ForwardIt last) {
+	for (; first != last; ++first)
+		destroy_at(std::addressof(*first));
+}
+template<class T>
+void destroy_at(T* p) {
+	p->~T();
+}
 
 }
 #endif // !UNINITIALIZED_STORAGE_HPP

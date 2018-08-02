@@ -2,18 +2,9 @@
 #define ITERATOR_HPP
 
 #include<cstddef>
-
+#include"iterator_traits.hpp"
 
 namespace LightSTL {
-
-struct input_iterator_tag {};
-struct output_iterator_tag {};
-struct forward_iterator_tag : public input_iterator_tag {};
-struct bidirectional_iterator_tag : public forward_iterator_tag {};
-struct random_access_iterator_tag : public bidirectional_iterator_tag {};
-
-
-
 
 template<
 	class Category,
@@ -28,7 +19,7 @@ template<
 	using pointer = Pointer;
 	using reference = Reference;
 };
-/*
+
 template< class Iterator >
 class reverse_iterator : public iterator<input_iterator_tag,Iterator> {
 public:
@@ -51,21 +42,33 @@ public:
 		current = other.base();
 	}
 
-	Iterator base() const {
-		return current;
-	}
 
-	reference operator*() const {
-		return *current;
-	}
-
-	pointer operator->() const {
-		return current;
-	}
 protected:
 	Iterator current;
 };
 
-*/
+
+namespace detail {
+	template< class InputIt >
+	inline typename iterator_traits<InputIt>::difference_type _distance(InputIt first, InputIt last, input_iterator_tag) {
+		typename iterator_traits<InputIt>::difference_type n = 0;
+		while (first != last)
+			first++;
+		return n;
+	}
+
+	template< class InputIt >
+	inline typename iterator_traits<InputIt>::difference_type _distance(InputIt first, InputIt last, random_access_iterator_tag) {
+		return last - first;
+	}
+}
+
+template< class InputIt >
+inline typename iterator_traits<InputIt>::difference_type distance(InputIt first, InputIt last) {
+	using category = typename iterator_traits<InputIt>::iterator_category;
+	return detail::_distance(first, last, category());
+}
+
+
 }
 #endif // !ITERATOR_HPP

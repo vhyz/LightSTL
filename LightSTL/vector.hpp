@@ -11,6 +11,10 @@
 #include<cassert>	
 #include<stdexcept>
 
+
+
+namespace LightSTL {
+
 template<class T, class Allocator = LightSTL::allocator<T> >
 class vector {
 public:
@@ -34,9 +38,9 @@ private:
 
 	void _free_data() {
 		if (start) {
-			for (auto i = finish; i != start; --i)
+			for (auto i = start; i != finish; ++i)
 				data_alloc.destory(i);
-			data_alloc.deallocate(start, end_of_storage - start);
+			data_alloc.deallocate(start);
 		}
 	}
 
@@ -68,7 +72,40 @@ private:
 
 	std::pair<T*,T*> alloc_n_fill(const T& val, size_type n) {
 		T* p = data_alloc.allocate(n);
-		return { p, LightSTL::uninitialized_fill_n(start, n, val) };
+		return { p, LightSTL::uninitialized_fill_n(p, n, val) };
+	}
+
+	void move_safe(T* first, T* last, T* d_first) {
+		size_type len = last - first;
+		d_first += (len - 1);
+		last--;
+		for (size_type i = 0; i < len; ++i, d_first--, last--) {
+			data_alloc.construct(d_first, std::move(*last));
+			data_alloc.destory(last);
+		}
+	}
+	template<class It>
+	void insert_aux_iterator(const_iterator pos, It first, It last) {
+		auto dis = LightSTL::distance(first, last);
+		size_type new_size = size() + dis;
+		if (new_size > capacity()) {
+			T* p = data_alloc.allocate(new_size);
+			auto new_pos = uninitialized_move(start, pos, p);
+			uninitialized_copy(first, last, new_pos);
+			uninitialized_move(pos, finish, new_pos + dis);
+			_free_data();
+			start = p;
+			finish = end_of_storage = p + new_size;
+		} else {
+			move_safe(pos, finish, pos + dis);
+			uninitialized_copy(first, last, pos);
+			finish += dis;
+		}
+	}
+
+	template<class... Args>
+	void insert_aux_args(const_iterator pos, Args&&... args) {
+
 	}
 public:
 
@@ -86,7 +123,11 @@ public:
 
 	//委托构造函数
 	explicit vector(size_type count, const Allocator& alloc = Allocator())
-		: vector(count, T(), alloc)  {}
+		: data_alloc(alloc) {
+		T* p = data_alloc.allocate(count);
+		start = p;
+		end_of_storage = finish = LightSTL::uninitialized_default_construct_n(p, count);
+	}
 
 
 	template<class InputIt>
@@ -190,7 +231,7 @@ public:
 		finish = end_of_storage = res.second;
 	}
 
-	template< class InputIt ,std::enable_if_t>
+	template< class InputIt>
 	void assign(InputIt first, InputIt last) {
 		_free_data();
 		auto res = alloc_n_copy(first, last, last - first);
@@ -329,7 +370,7 @@ public:
 	}
 	iterator erase(const_iterator first, const_iterator last) {
 		for (; first < last; ++first)
-			first->T();
+			first->~T();
 		if (last != finish)
 			finish = LightSTL::uninitialized_move(last, finish, first);
 		else
@@ -380,6 +421,6 @@ public:
 };
 
 
-
+}
 
 #endif // !VECTOR_HPP

@@ -40,8 +40,8 @@ public:
 		return (T*)::operator new(n * sizeof(T));
 	}
 
-	void deallocate(T* ptr, std::size_t n) {
-		::operator delete (ptr++);
+	void deallocate(T* ptr) {
+		::operator delete (ptr);
 	}
 
 	template<class... Args>
