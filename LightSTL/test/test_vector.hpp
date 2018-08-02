@@ -31,7 +31,7 @@ namespace test {
 	void test_vector() {
 		LightSTL::vector<int>LightSTL_vec;
 		std::vector<int>std_vec;
-		//test_vector_template(LightSTL_vec);
+		test_vector_template(LightSTL_vec);
 		test_vector_template(std_vec);
 	}
 }

@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClInclude Include="iterator\iterator.hpp" />
     <ClInclude Include="iterator\iterator_traits.hpp" />
+    <ClInclude Include="list.hpp" />
     <ClInclude Include="memory\addressof.hpp" />
     <ClInclude Include="memory\allocator.hpp" />
     <ClInclude Include="memory\allocator_traits.hpp" />
