@@ -85,27 +85,54 @@ private:
 		}
 	}
 	template<class It>
-	void insert_aux_iterator(const_iterator pos, It first, It last) {
+	iterator insert_aux_iterator(const_iterator pos, It first, It last) {
+
+		//以一组迭代器方式进行插入
 		auto dis = LightSTL::distance(first, last);
 		size_type new_size = size() + dis;
+		iterator old_pos = const_cast<iterator>(pos);
+
 		if (new_size > capacity()) {
+			//若空间不足，申请new_size的空间
 			T* p = data_alloc.allocate(new_size);
-			auto new_pos = uninitialized_move(start, pos, p);
+			auto new_pos = uninitialized_move(start, old_pos, p);
 			uninitialized_copy(first, last, new_pos);
-			uninitialized_move(pos, finish, new_pos + dis);
+			uninitialized_move(old_pos, finish, new_pos + dis);
 			_free_data();
 			start = p;
 			finish = end_of_storage = p + new_size;
+			return new_pos;
 		} else {
-			move_safe(pos, finish, pos + dis);
-			uninitialized_copy(first, last, pos);
+			//进行安全移动，从末尾元素开始移动
+			move_safe(old_pos, finish, old_pos + dis);
+			uninitialized_copy(first, last, old_pos);
 			finish += dis;
+			return old_pos;
 		}
+
 	}
 
 	template<class... Args>
-	void insert_aux_args(const_iterator pos, Args&&... args) {
-		
+	iterator insert_aux_args(const_iterator pos, Args&&... args) {
+		auto pos_dis = pos - start;
+		size_type len = size();
+		iterator old_pos = const_cast<iterator>(pos);
+		if (finish == end_of_storage) {
+			size_type new_size = len ? len * 2 : 1;
+			T* p = data_alloc.allocate(new_size);
+			auto new_pos = uninitialized_move(start, old_pos, p);
+			data_alloc.construct(new_pos, std::forward<Args>(args)...);
+			auto new_finish = uninitialized_move(old_pos, finish, new_pos + 1);
+			_free_data();
+			start = p;
+			finish = new_finish;
+			end_of_storage = p + new_size;
+		} else {
+			uninitialized_move(old_pos, finish, old_pos + 1);
+			finish++;
+			data_alloc.construct(old_pos, std::forward<Args>(args)...);
+		}
+		return start + pos_dis;
 	}
 public:
 
@@ -152,7 +179,7 @@ public:
 	}
 
 	vector(std::initializer_list<T> init, const Allocator& alloc = Allocator()) {
-		std::pair<T*, T*> res = alloc_n_copy(init.begin(), init.end(), init.end() - init.begin());
+		std::pair<T*, T*> res = alloc_n_copy(const_cast<T*>(init.begin()), const_cast<T*>(init.end()), init.end() - init.begin());
 		start = res.first;
 		finish = end_of_storage = res.second;
 	}
@@ -345,25 +372,25 @@ public:
 	}
 
 	iterator insert(const_iterator pos, const T& value) {
-
+		return insert_aux_args(pos, value);
 	}
 	iterator insert(const_iterator pos, T&& value) {
-
+		return insert_aux_args(pos, value);
 	}
 	iterator insert(const_iterator pos, size_type count, const T& value) {
-
+		
 	}
 	template< class InputIt >
 	iterator insert(const_iterator pos, InputIt first, InputIt last) {
-
+		return insert_aux_iterator(pos, first, last);
 	}
 	iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
-
+		return insert_aux_iterator(pos, ilist.begin(), ilist.end());
 	}
 
 	template< class... Args >
 	iterator emplace(const_iterator pos, Args&&... args) {
-
+		insert_aux_args(pos, std::forward<Args>(args)...);
 	}
 	iterator erase(const_iterator pos) {
 		erase(pos, pos + 1);
@@ -399,9 +426,22 @@ public:
 	}
 
 	void resize(size_type count) {
-		T value;
-		resize(count, value);
+		if (count > capacity()) {
+			auto res = alloc_n_move(start, finish, count);
+			start = res.first;
+			finish = res.second;
+			end_of_storage = start + count;
+		}
+
+		if (count > size()) {
+			finish = LightSTL::uninitialized_default_construct_n(finish, count - size());
+		} else {
+			size_type len = size() - count;
+			for (size_type i = 0; i < len; ++i)
+				data_alloc.destory(finish--);
+		}
 	}
+
 	void resize(size_type count, const value_type& value) {
 		if (count > capacity()) {
 			auto res = alloc_n_move(start, finish, count);
@@ -411,7 +451,7 @@ public:
 		}
 
 		if (count > size()) {
-			LightSTL::uninitialized_fill_n(finish, count - size(), value);
+			finish = LightSTL::uninitialized_fill_n(finish, count - size(), value);
 		} else {
 			size_type len = size() - count;
 			for (size_type i = 0; i < len; ++i)

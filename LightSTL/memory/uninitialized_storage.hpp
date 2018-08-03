@@ -121,7 +121,7 @@ void uninitialized_default_construct(ForwardIt first, ForwardIt last) {
 	ForwardIt current = first;
 	try {
 		for (; current != last; ++current) {
-			::new (static_cast<void*>(addressof(*current))) Value;
+			::new (static_cast<void*>(addressof(*current))) Value();
 		}
 	} catch (...) {
 		for (; first != last; ++first)
@@ -136,7 +136,7 @@ ForwardIt uninitialized_default_construct_n(ForwardIt first, Size n) {
 	ForwardIt current = first;
 	try {
 		for (; n > 0; (void) ++current, --n) {
-			::new (static_cast<void*>(addressof(*current))) T;
+			::new (static_cast<void*>(addressof(*current))) T();
 		}
 		return current;
 	} catch (...) {

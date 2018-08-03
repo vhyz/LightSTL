@@ -27,13 +27,39 @@ namespace test {
 		std::cout << clock() - start << std::endl;
 	}
 
+	template<class T>
+	void show(LightSTL::vector<T>&vec) {
+		for (auto &i : vec)
+			std::cout << i << " ";
+		std::cout << std::endl;
+	}
 
-	void test_vector() {
+	void test_insert() {
+		LightSTL::vector<int>a = { 1,2,3,4 };
+		show(a);
+		LightSTL::vector<int>b = { -1,-2 };
+		a.insert(a.begin() + 1,4);
+		show(a);
+		a.insert(a.begin() + 2, b.begin(), b.end());
+		show(a);
+		a.insert(a.begin() + 1, { 1,2,3,4 });
+		show(a);
+		a.resize(a.size() * 2);
+		show(a);
+	}
+
+	void test_speed() {
 		LightSTL::vector<int>LightSTL_vec;
 		std::vector<int>std_vec;
 		test_vector_template(LightSTL_vec);
 		test_vector_template(std_vec);
 	}
+
+	void test_vector() {
+		test_insert();
+	}
+
+
 }
 
 

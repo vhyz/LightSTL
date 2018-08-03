@@ -2,6 +2,12 @@
 #include"test/test_uninitialized_storage.hpp"
 #include"test/test_vector.hpp"
 
+template<class T>
+void f(T a, T b) {
+
+}
+
+
 int main() {
 	addressof_test();
 	test::test_uninitialized_storage();
