@@ -46,6 +46,7 @@ namespace test {
 		show(a);
 		a.resize(a.size() * 2);
 		show(a);
+
 	}
 
 	void test_speed() {

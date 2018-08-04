@@ -421,8 +421,7 @@ public:
 	}
 
 	void pop_back() {
-		data_alloc.destory(finish - 1);
-		finish--;
+		data_alloc.destory(--finish);
 	}
 
 	void resize(size_type count) {
