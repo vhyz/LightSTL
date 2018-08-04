@@ -1,4 +1,4 @@
-# LightSTL
+﻿# LightSTL
 
 LightSTL是学习STL时根据C++标准与侯捷的《STL源码剖析》写的简单的STL库，目前的想法是先把常用的先写出来。
 
@@ -21,7 +21,6 @@ LightSTL是学习STL时根据C++标准与侯捷的《STL源码剖析》写的简
 * enable_shared_from_this
 * default_delete
 * allocator
-* enable_shared_from_this
 * addressof
 * uninitialized_storage
   
