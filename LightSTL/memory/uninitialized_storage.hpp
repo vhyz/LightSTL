@@ -68,7 +68,7 @@ ForwardIt uninitialized_fill_n(ForwardIt first, Size count, const T& value) {
 	ForwardIt current = first;
 	try {
 		for (; count > 0; ++current, (void) --count) {
-			::new (static_cast<void*>(addressof(*current))) Value(value);
+			::new (static_cast<void*>(LightSTL::addressof(*current))) Value(value);
 		}
 		return current;
 	} catch (...) {
@@ -86,7 +86,7 @@ ForwardIt uninitialized_move(InputIt first, InputIt last, ForwardIt d_first) {
 	ForwardIt current = d_first;
 	try {
 		for (; first != last; ++first, (void) ++current) {
-			::new (static_cast<void*>(addressof(*current))) Value(std::move(*first));
+			::new (static_cast<void*>(LightSTL::addressof(*current))) Value(std::move(*first));
 		}
 		return current;
 	} catch (...) {

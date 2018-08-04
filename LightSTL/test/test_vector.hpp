@@ -6,6 +6,7 @@
 #include<cassert>
 #include<ctime>
 #include<vector>
+#include<string>
 
 namespace test {
 	class A {
@@ -18,12 +19,11 @@ namespace test {
 	};
 	template<typename V>
 	void test_vector_template(V& vec) {
+		std::string a(100, 'a');
 		const int n = 1000000;
 		clock_t start = clock();
 		for (int i = 0; i < n; ++i)
-			vec.push_back(i);
-		for (int i = 0; i < n; ++i)
-			(void)vec[i];
+			vec.push_back(a);
 		std::cout << clock() - start << std::endl;
 	}
 
@@ -50,14 +50,15 @@ namespace test {
 	}
 
 	void test_speed() {
-		LightSTL::vector<int>LightSTL_vec;
-		std::vector<int>std_vec;
+		LightSTL::vector<std::string>LightSTL_vec;
+		std::vector<std::string>std_vec;
 		test_vector_template(LightSTL_vec);
 		test_vector_template(std_vec);
 	}
 
 	void test_vector() {
 		test_insert();
+		test_speed();
 	}
 
 
