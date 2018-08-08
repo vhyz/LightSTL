@@ -86,7 +86,7 @@ private:
 	}
 	template<class It>
 	iterator insert_aux_iterator(const_iterator pos, It first, It last) {
-
+		
 		//以一组迭代器方式进行插入
 		auto dis = LightSTL::distance(first, last);
 		size_type new_size = size() + dis;

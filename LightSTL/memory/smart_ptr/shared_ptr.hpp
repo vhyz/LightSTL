@@ -24,6 +24,9 @@ class shared_ptr {
 
 	template<typename Deleter, typename T>
 	friend Deleter* get_deleter(const shared_ptr<T>& p) noexcept;
+
+	template<typename Y, typename... Args>
+	friend shared_ptr<Y> make_shared(Args&&... args);
 public:
 	using element_type = std::remove_extent_t<T>;
 	using weak_type = weak_ptr<T>;
@@ -231,19 +234,25 @@ private:
 	void _shared_from_this(Y* p) {}
 
 	template<typename Y, std::enable_if_t<std::is_base_of_v<enable_shared_from_this<Y>,Y>,int> = 0>
-		void _shared_from_this(Y* p) {
+	void _shared_from_this(Y* p) {
 			p->_internal_accept_owner(*this);
 	}
+
+
 };
 
 template<typename T, typename... Args>  
 shared_ptr<T> make_shared(Args&&... args) {
 	//T不是数组类型
 	
-	//C++标准推荐一次分配，这里只进行两次分配内存的方式，使用std::forward进行完美转发
+	//仅进行一次分配
 
-	T* p = new T(std::forward<Args>(args)...);
-	shared_ptr<T>res(p);
+	detail::ms_ref_count<T>* ms_count = new detail::ms_ref_count<T>(std::forward<Args>(args)...);
+
+	shared_ptr<T>res;
+	res.ptr = ms_count->ptr;
+	res.ref = ms_count;
+
 	return res;
 }
 

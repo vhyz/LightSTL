@@ -2,6 +2,7 @@
 #define REF_COUNT_HPP
 #include<atomic>
 #include"deleter.hpp"
+#include<cstddef>
 #include<iostream>
 
 namespace LightSTL{
@@ -55,20 +56,16 @@ struct ref_count :public ref_count_base {
 	Deleter deleter;
 
 	ref_count()
-		:ptr(nullptr), ref_count_base() {
-	}
+		:ptr(nullptr), ref_count_base() {}
 
-	ref_count(nullptr_t)
-		:ptr(nullptr), ref_count_base() {
-	}
+	ref_count(std::nullptr_t)
+		:ptr(nullptr), ref_count_base() {}
 
 	ref_count(T* p)
-		:ptr(p), ref_count_base() {
-	}
+		:ptr(p), ref_count_base() {}
 
 	ref_count(T* p, const Deleter& d)
-		:ptr(p), deleter(d), ref_count_base() {
-	}
+		:ptr(p), deleter(d), ref_count_base() {}
 
 	ref_count(const ref_count&) = delete;
 
@@ -76,18 +73,17 @@ struct ref_count :public ref_count_base {
 
 	ref_count& operator=(const ref_count) = delete;
 
-	~ref_count() noexcept {}
+	virtual ~ref_count() noexcept {}
 
-	void* get_deleter()override {
+	virtual void* get_deleter()override {
 		return &deleter;
 	}
 
 	virtual void release()override {
 		deleter(ptr);
-		ptr = nullptr;
 	}
 
-	void destory()override {
+	virtual void destory()override {
 		delete this;
 		std::cout << "deleter ref\n";
 	}
@@ -99,20 +95,16 @@ struct ref_count<T[], Deleter> :public ref_count_base {
 	Deleter deleter;
 
 	ref_count()
-		:ptr(nullptr), ref_count_base() {
-	}
+		:ptr(nullptr), ref_count_base() {}
 
-	ref_count(nullptr_t)
-		:ptr(nullptr), ref_count_base() {
-	}
+	ref_count(std::nullptr_t)
+		:ptr(nullptr), ref_count_base() {}
 
 	ref_count(T* p)
-		:ptr(p), ref_count_base() {
-	}
+		:ptr(p), ref_count_base() {}
 
 	ref_count(T* p, const Deleter& d)
-		:ptr(p), deleter(d), ref_count_base() {
-	}
+		:ptr(p), deleter(d), ref_count_base() {}
 
 	ref_count(const ref_count&) = delete;
 
@@ -122,20 +114,40 @@ struct ref_count<T[], Deleter> :public ref_count_base {
 
 	~ref_count() noexcept {}
 
-	void* get_deleter()override {
+	virtual void* get_deleter()override {
 		return &deleter;
 	}
 
 	virtual void release()override {
 		deleter(ptr);
-		ptr = nullptr;
 	}
 
-	void destory() override {
+	virtual void destory() override {
 		delete this;
 		std::cout << "deleter ref\n";
 	}
 };
+
+template<typename T>
+struct ms_ref_count :public ref_count<T>  {
+private:
+	T data;
+public:
+	template<class... Args>
+	ms_ref_count(Args&&... args)
+		: data(std::forward<Args>(args)...) {
+		ptr = &data;
+	}
+
+	virtual void release()override  {}
+
+	virtual void destory() override {
+		delete this;
+		std::cout << "deleter ms_ref\n";
+	}
+
+};
+
 
 }
 

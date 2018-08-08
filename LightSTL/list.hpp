@@ -1,4 +1,6 @@
 ﻿#ifndef LIST_HPP
+#define LIST_HPP
+
 
 #include<cstddef>
 #include"memory/allocator.hpp"
@@ -9,7 +11,7 @@ namespace detail {
 	
 }
 
-template<class T,class Allocator=LightSTL::allocator<T>>
+template<class T,class Allocator = LightSTL::allocator<T> >
 class list {
 
 public:
@@ -29,7 +31,6 @@ public:
 
 private:
 	//node
-	template<class T>
 	struct node {
 		node* prev;
 		node* next;
@@ -43,7 +44,7 @@ private:
 	node* _head;
 	node* _back;
 	size_type _size;
-	Allocator data_alloc;
+	LightSTL::allocator<T> data_alloc;
 public:
 	//构造函数
 	list()
@@ -52,7 +53,14 @@ public:
 	explicit list(const Allocator& alloc)
 		: _head(nullptr), _back(nullptr), _size(0), data_alloc(alloc) {}
 
-	list(size_type count, const T& value, const Allocator& alloc = Allocator());
+	list(size_type count, const T& value, const Allocator& alloc = Allocator()){
+		_size = count;
+		while (count--) {
+			
+		}
+	}
+
+
 	explicit list(size_type count, const Allocator& alloc = Allocator());
 	template< class InputIt >
 	list(InputIt first, InputIt last,
@@ -62,6 +70,16 @@ public:
 	list(list&& other);
 	list(list&& other, const Allocator& alloc);
 	list(std::initializer_list<T> init, const Allocator& alloc = Allocator());
+
+	//修改器
+	void push_back(const T& value) {
+		if (_size) {
+			node* n = data_alloc.allocate();
+
+		} else {
+
+		}
+	}
 };
 
 #endif // !LIST_HPP

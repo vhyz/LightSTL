@@ -27,28 +27,28 @@ public:
 	allocator(const allocator<U>& other) noexcept {};
 	~allocator() {}
 
-	T* address(T& x)const {
+	static T* address(T& x) {
 		return addressof(x);
 	}
-	const T* address(const T& x)const {
+	static const T* address(const T& x) {
 		return addressof(x);
 	}
 
-	T* allocate(std::size_t n = 1) {
+	static T* allocate(std::size_t n = 1) {
 		if (n == 0)
 			return nullptr;
 		return (T*)::operator new(n * sizeof(T));
 	}
 
-	void deallocate(T* ptr) {
+	static void deallocate(T* ptr) {
 		::operator delete (ptr);
 	}
 
 	template<class... Args>
-	inline void construct(T* ptr, Args&&... args) {
+	static inline void construct(T* ptr, Args&&... args) {
 		new (ptr) T(std::forward<Args>(args)...);
 	}
-	inline void destory(T* ptr) {
+	static inline void destory(T* ptr) {
 		ptr->~T();
 	}
 
