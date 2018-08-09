@@ -238,18 +238,12 @@ public:
 	}
 
 public:
-	//
-	size_type size()const { 
-		return finish - start;
-	}
+	//容量
+	size_type size()const { return finish - start;}
 
-	size_type capacity()const { 
-		return end_of_storage - start;
-	}
+	size_type capacity()const {  return end_of_storage - start; }
 
-	allocator_type get_allocator() const { 
-		return data_alloc;
-	}
+	allocator_type get_allocator() const { return data_alloc;}
 
 	void assign(size_type count, const T& value) {
 		_free_data();
@@ -274,6 +268,8 @@ public:
 		finish = end_of_storage = res.second;
 	}
 
+
+	//元素访问
 	reference at(size_type pos) {
 		if (size() <= pos)
 			throw std::out_of_range();
@@ -283,75 +279,30 @@ public:
 		if (size() <= pos)
 			throw std::out_of_range();
 		return start[pos];
-	}
+	}	
+	reference operator[](size_type pos)             { return start[pos];}
+	const_reference operator[](size_type pos) const { return start[pos];}
+	reference front()                               { return *start;}
+	const_reference front() const                   { return *start;}
+	reference back()                                { return *(finish - 1);}
+	const_reference back() const                    { return *(finish - 1);}
+	T* data() noexcept                              { return start; }
+	const T* data() const noexcept                  { return start; }
 
-	reference operator[](size_type pos) {
-		return start[pos];
-	}
-	const_reference operator[](size_type pos) const {
-		return start[pos];
-	}
 
-	reference front() {
-		return *start;
-	}
-	const_reference front() const {
-		return *start;
-	}
-
-	reference back() {
-		return *(finish - 1);
-	}
-	const_reference back() const {
-		return *(finish - 1);
-	}
-
-	T* data() noexcept {
-		return start;
-	}
-	const T* data() const noexcept {
-		return start;
-	}
-
-	iterator begin() noexcept {
-		return start;
-	}
-	const_iterator begin() const noexcept {
-		return start;
-	}
-	const_iterator cbegin() const noexcept {
-		return start;
-	}
-
-	iterator end() {
-		return finish;
-	}
-	const_iterator end() const noexcept {
-		return finish;
-	}
-	const_iterator cend() const noexcept {
-		return finish;
-	}
-
-	reverse_iterator rbegin() noexcept {
-		return reverse_iterator(finish - 1);
-	}
-	const_reverse_iterator rbegin() const noexcept {
-		return const_reverse_iterator(finish - 1);
-	}
-	const_reverse_iterator crbegin() const noexcept {
-		return const_reverse_iterator(finish - 1);
-	}
-
-	reverse_iterator rend() noexcept {
-		return reverse_iterator(start - 1);
-	}
-	const_reverse_iterator rend() const noexcept {
-		return const_reverse_iterator(start - 1);
-	}
-	const_reverse_iterator crend() const noexcept {
-		return const_reverse_iterator(start - 1);
-	}
+	//迭代器
+	iterator begin() noexcept                       { return start; }
+	const_iterator begin() const noexcept           { return start; }
+	const_iterator cbegin() const noexcept          { return start; }
+	iterator end()                                  { return finish;}
+	const_iterator end() const noexcept             { return finish;}
+	const_iterator cend() const noexcept            { return finish;}
+	reverse_iterator rbegin() noexcept              { return reverse_iterator(finish - 1);      }
+	const_reverse_iterator rbegin() const noexcept  { return const_reverse_iterator(finish - 1);}
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish - 1);}
+	reverse_iterator rend() noexcept                { return reverse_iterator(start - 1);       }
+	const_reverse_iterator rend() const noexcept    { return const_reverse_iterator(start - 1 );}
+	const_reverse_iterator crend() const noexcept   { return const_reverse_iterator(start - 1); }
 
 	bool empty() const noexcept {
 		return start == nullptr;

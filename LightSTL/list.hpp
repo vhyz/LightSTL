@@ -36,7 +36,7 @@ namespace detail {
 		list_iterator(const list_iterator& other)
 			: n(other.n)  {}
 
-		T& operator*()const { return n->data; }
+		T& operator*()const  { return n->data; }
 		T* operator->()const { return &(n->data); }
 
 		list_iterator& operator++() {
@@ -87,17 +87,30 @@ public:
 
 private:
 
-	template<class Args...>
+	template<class... Args>
 	node* create_node(Args&&... args) {
 		node* res = data_alloc.allocate();
 		data_alloc.construct(res, std::forward<Args>(args)...);
 		return res;
 	}
 
+	template<class... Args>
+	void create_first_node(Args&&... args) {
+		node* n = create_node(nullptr, nullptr, std::forward<Args>(args)...);
+		_head = _back = n;
+	}
+
 	void destory_node(node* n) {
 		data_alloc.destory(n);
 		data_alloc.deallocate(n);
 	}
+
+	void empty_init() {
+		_size = 0;
+		_head = nullptr;
+		_back = nullptr;
+	}
+
 
 	node* _head;
 	node* _back;
@@ -113,8 +126,18 @@ public:
 	explicit list(const Allocator& alloc)
 		: _head(nullptr), _back(nullptr), _size(0), data_alloc(alloc) {}
 
-	list(size_type count, const T& value, const Allocator& alloc = Allocator()){
-		_size = count;
+	list(size_type count, const T& value, const Allocator& alloc = Allocator())
+		: data_alloc(alloc) {
+		if (count == 0) {
+			empty_init();
+		} else {
+			create_first_node(value);
+			count--;
+			while (count--) {
+				_back = create_node(_back, nullptr, value);
+
+			}
+		}
 	}
 
 	explicit list(size_type count, const Allocator& alloc = Allocator());
@@ -133,7 +156,7 @@ public:
 			node* n = data_alloc.allocate();
 			data_alloc.construct(n, value);
 		} else {
-
+			
 		}
 	}
 
