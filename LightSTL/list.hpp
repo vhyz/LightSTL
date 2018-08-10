@@ -83,9 +83,10 @@ public:
 	using const_iterator = detail::list_iterator<const T>;
 	using reverse_iterator = LightSTL::reverse_iterator<iterator>;
 	using const_reverse_iterator = LightSTL::reverse_iterator<const_iterator>;
-	using node = detail::node<T>;
 
 private:
+
+	using node = detail::node<T>;
 
 	template<class... Args>
 	node* create_node(Args&&... args) {
@@ -94,73 +95,189 @@ private:
 		return res;
 	}
 
-	template<class... Args>
-	void create_first_node(Args&&... args) {
-		node* n = create_node(nullptr, nullptr, std::forward<Args>(args)...);
-		_head = _back = n;
-	}
-
 	void destory_node(node* n) {
 		data_alloc.destory(n);
 		data_alloc.deallocate(n);
 	}
 
 	void empty_init() {
+		_node = data_alloc.allocate();
+		_node->next = _node;
+		_node->prev = _node;
 		_size = 0;
-		_head = nullptr;
-		_back = nullptr;
 	}
 
-
-	node* _head;
-	node* _back;
+	void free_nodes() {
+		for (size_type i = 0; i < _size; ++i) {
+			node*tmp = _node->next;
+			destory_node(_node);
+			_node = tmp;
+		}
+		_size = 0;
+	}
+	node* _node;
 	size_type _size;
 	LightSTL::allocator<T> data_alloc;
 
+	template<class It>
+	void insert_aux_iterator(it start, it last) {
 
+	}
 public:
 	//构造函数
-	list()
-		: _head(nullptr), _back(nullptr), _size(0), data_alloc() {}
-
-	explicit list(const Allocator& alloc)
-		: _head(nullptr), _back(nullptr), _size(0), data_alloc(alloc) {}
-
-	list(size_type count, const T& value, const Allocator& alloc = Allocator())
-		: data_alloc(alloc) {
-		if (count == 0) {
-			empty_init();
-		} else {
-			create_first_node(value);
-			count--;
-			while (count--) {
-				_back = create_node(_back, nullptr, value);
-
-			}
-		}
+	list() { 
+		empty_init(); 
 	}
 
-	explicit list(size_type count, const Allocator& alloc = Allocator());
+	explicit list(const Allocator& alloc) 
+		: data_alloc(alloc) { 
+		empty_init();
+	}
+	list(size_type count, const T& value, const Allocator& alloc = Allocator())
+		: data_alloc(alloc) {}
+
+	explicit list(size_type count, const Allocator& alloc = Allocator())
+		: data_alloc(alloc) {
+	}
+
 	template< class InputIt >
 	list(InputIt first, InputIt last,
 		const Allocator& alloc = Allocator());
-	list(const list& other);
-	list(const list& other, const Allocator& alloc);
-	list(list&& other);
-	list(list&& other, const Allocator& alloc);
-	list(std::initializer_list<T> init, const Allocator& alloc = Allocator());
 
-	//修改器
-	void push_back(const T& value) {
-		if (_size) {
-			node* n = data_alloc.allocate();
-			data_alloc.construct(n, value);
-		} else {
-			
-		}
+	//委托构造函数
+	list(const list& other)
+		: list(other,other.data_alloc)  {}
+
+	list(const list& other, const Allocator& alloc)
+		: data_alloc(alloc) {
+
 	}
 
+	list(list&& other)
+		: _node(other._node), _size(other._size), data_alloc(std::move(other.data_alloc)) {}
+
+	list(list&& other, const Allocator& alloc)
+		: _node(other._node), _size(other._size), data_alloc(alloc) {}
+
+
+	list(std::initializer_list<T> init, const Allocator& alloc = Allocator());
+
+	//析构函数
+	~list() {
+		free_nodes();
+	}
+
+
+
+
+	//元素访问
+	reference front() { return _head->data; }
+	const_reference front() const { return _head->data; }
+	reference back() { return _back->data; }
+	const_reference back() const { return _back->data; }
+
+	//迭代器
+	iterator begin() noexcept { return iterator(_head); }
+	const_iterator begin() const noexcept { return const_iterator(_head); }
+	const_iterator cbegin() const noexcept { return const_iterator(_head); }
+	iterator end() noexcept { return iterator(nullptr); }
+	const_iterator end() const noexcept { return const_iterator(nullptr); }
+	const_iterator cend() const noexcept { return const_iterator(nullptr); }
+	reverse_iterator rbegin() noexcept { return reverse_iterator(_back); }
+	const_reverse_iterator rbegin() const noexcept;
+	const_reverse_iterator crbegin() const noexcept;
+	reverse_iterator rend() noexcept;
+	const_reverse_iterator rend() const noexcept;
+	const_reverse_iterator crend() const noexcept;
 	
+	//容量
+	bool empty() const noexcept { return _size == 0; }
+	size_type size() const noexcept { return _size; }
+
+	//修改器
+	void clear() noexcept { 
+		free_nodes(); 
+	}
+	void push_back(const T& value) {
+		if (_size) {
+			_back = create_node(_back, nullptr, value);
+		} else {
+			create_first_node(value);
+		}
+		_size++;
+	}
+	void push_back(T&& value) {
+		if (_size) {
+			_back = create_node(_back, nullptr, std::move(value));
+		} else {
+			create_first_node(std::move(value));
+		}
+		_size++;
+	}
+	template< class... Args >
+	reference emplace_back(Args&&... args) {
+		if (_size) {
+			_back = create_first_node(_back, nullptr, std::forward<Args>(args)...);
+		} else {
+			create_first_node(std::forward<Args>(args)...);
+		}
+		_size++;
+	}
+	void pop_back() {
+		_size--;
+		node* prev = _back->prev;
+		destory_node(_back);
+		_back = prev;
+	}
+	void push_front(const T& value) {
+		if (_size) {
+			_head = create_node(nullptr, _head, value);
+		} else {
+			create_first_node(value);
+		}
+		_size++;
+	}
+	void push_front(T&& value) {
+		if (_size) {
+			_head = create_node(nullptr, _head, std::move(value));
+		} else {
+			create_first_node(std::move(value));
+		}
+		_size++;
+	}
+	template< class... Args >
+	reference emplace_front(Args&&... args) {
+		if (_size) {
+			_head = create_node(nullptr, _head, std::forward<Args>(args)...);
+		} else {
+			create_first_node(std::forward<Args>(args)...);
+		}
+		_size++;
+	}
+	void pop_front() {
+		_size--;
+		node*next = _head->next;
+		destory_node(_head);
+		_head = next;
+	}
+	iterator erase(const_iterator pos) {
+		
+	}
+	void swap(list& other) noexcept {
+		size_type tmp_size = _size;
+		_size = other._size;
+		other._size = tmp_size;
+
+		node* tmp_node = _head;
+		_head = other._head;
+		other._head = tmp_node;
+
+		tmp_node = _back;
+		_back = other._back;
+		other._back = tmp_node;
+	}
+
+
 };
 
 #endif // !LIST_HPP

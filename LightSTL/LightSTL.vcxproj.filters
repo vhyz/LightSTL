@@ -96,6 +96,9 @@
     <ClInclude Include="test\test_allocator.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="test\test_list.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
