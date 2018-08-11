@@ -70,5 +70,16 @@ inline typename iterator_traits<InputIt>::difference_type distance(InputIt first
 }
 
 
+namespace detail {
+
+}
+
+
+template< class InputIt, class Distance >
+constexpr void advance(InputIt& it, Distance n) {
+	using category = typename iterator_traits<InputIt>::iterator_category;
+}
+
+
 }
 #endif // !ITERATOR_HPP

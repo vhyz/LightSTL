@@ -5,6 +5,7 @@
 #include<cstddef>
 #include"memory/allocator.hpp"
 #include"iterator/iterator.hpp"
+#include"memory/addressof.hpp"
 
 
 namespace detail {
@@ -22,6 +23,10 @@ namespace detail {
 
 	template<class T>
 	class list_iterator: public LightSTL::iterator<LightSTL::bidirectional_iterator_tag,T> {
+
+		template<class T>
+		friend node<T> get_node(list_iterator<T> it);
+
 	private:
 
 		using list_node = node<T>;
@@ -37,7 +42,7 @@ namespace detail {
 			: n(other.n)  {}
 
 		T& operator*()const  { return n->data; }
-		T* operator->()const { return &(n->data); }
+		T* operator->()const { return LightSTL::addressof(n->data); }
 
 		list_iterator& operator++() {
 			n = n->next;
@@ -64,6 +69,11 @@ namespace detail {
 		bool operator==(const list_iterator& other)const { return n == other.n; }
 		bool operator!=(const list_iterator& other)const { return n != other.n; }
 	};
+
+	template<class T>
+	node<T> get_node(list_iterator<T> it) {
+		return it.n;
+	}
 }
 
 template<class T,class Allocator = LightSTL::allocator<T> >
@@ -108,20 +118,110 @@ private:
 	}
 
 	void free_nodes() {
+		node* cur = _node->next;
 		for (size_type i = 0; i < _size; ++i) {
-			node*tmp = _node->next;
-			destory_node(_node);
+			node*tmp = cur->next;
+			destory_node(cur);
 			_node = tmp;
 		}
 		_size = 0;
+		_node->next = _node;
+		_node->prev = _node;
 	}
+
 	node* _node;
 	size_type _size;
 	LightSTL::allocator<T> data_alloc;
 
 	template<class It>
-	void insert_aux_iterator(it start, it last) {
+	iterator insert_aux_iterator(const_iterator pos, It start, It last) {
+		node* pre, cur;
+		node* pos_address = detail::get_node(pos);
+		pre = pos_address->prev;
+		node* res_pre = pre;
+		for (; start != last; ++start) {
+			cur = create_node(pre, pos_address, *start);
+			pre->next = cur;
+			pre = cur;
+			_size += 1;
+		}
+		return res_pre->next;
+	}
 
+	template<class... Args>
+	iterator insert_aux_args(const_iterator pos, Args&&... args) {
+		node* pos_address = detail::get_node(pos);
+		node* pre = pos_address->prev;
+		pre->next = create_node(pre, pos_address, std::forward<Args>(args)...);
+		_size += 1;
+		return pre->next;
+	}
+
+
+	iterator insert_aux_n(const_iterator pos, size_type n, const T& val) {
+		node* pre, cur;
+		node* pos_address = detail::get_node(pos);
+		pre = pos_address->prev;
+		node* res_pre = pre;
+		while (n--) {
+			cur = create_node(pre, pos_address, val);
+			pre->next = cur;
+			pre = cur;
+			_size += 1;
+		}
+		return res_pre->next;
+	}
+
+	iterator insert_aux_n_default(const_iterator pos, size_type n) {
+		node* pre, cur;
+		node* pos_address = detail::get_node(pos);
+		pre = pos_address->prev;
+		node* res_pre = pre;
+		while (n--) {
+			cur = create_node(pre, pos_address);
+			pre->next = cur;
+			_size += 1;
+		}
+		return res_pre->next;
+	}
+
+	void copy_list(const list& other) {
+		insert_aux_iterator(end(), other.begin(), other.end());
+	}
+
+	//转移资源时使用函数
+	void _resert() {
+		_node = nullptr;
+		_size = 0;
+	}
+
+	template<class T>
+	void _swap(T& lhs, T&rhs) {
+		T tmp = lhs;
+		lhs = rhs;
+		rhs = tmp;
+	}
+
+	iterator _erase_n(const_iterator s, const_iterator l) {
+		node* start = detail::get_node(s), last = detail::get_node(l);
+		last->prev = start->prev;
+		start->prev->next = last;
+		while (start != last) {
+			node*next = start->next;
+			destory_node(start);
+			start = next;
+			_size -= 1;
+		}
+		return iterator(last);
+	}
+
+	iterator _erase(const_iterator it) {
+		node* n = detail::get_node(it), *res = n->next;
+		n->prev->next = res;
+		res->prev = n->prev;
+		destory_node(n);
+		_size -= 1;
+		return iterator(res);
 	}
 public:
 	//构造函数
@@ -133,16 +233,26 @@ public:
 		: data_alloc(alloc) { 
 		empty_init();
 	}
+
 	list(size_type count, const T& value, const Allocator& alloc = Allocator())
-		: data_alloc(alloc) {}
+		: data_alloc(alloc) {
+		empty_init();
+		insert_aux_n(end(), count, value);
+	}
 
 	explicit list(size_type count, const Allocator& alloc = Allocator())
 		: data_alloc(alloc) {
+		empty_init();
+		insert_aux_n_default(end(), count);
 	}
 
 	template< class InputIt >
-	list(InputIt first, InputIt last,
-		const Allocator& alloc = Allocator());
+	list(InputIt first, InputIt last, const Allocator& alloc = Allocator())
+		: data_alloc(alloc) {
+		empty_init();
+		insert_aux_iterator(end(), first, last);
+	}
+
 
 	//委托构造函数
 	list(const list& other)
@@ -150,31 +260,63 @@ public:
 
 	list(const list& other, const Allocator& alloc)
 		: data_alloc(alloc) {
-
+		empty_init();
+		copy_list();
 	}
 
 	list(list&& other)
-		: _node(other._node), _size(other._size), data_alloc(std::move(other.data_alloc)) {}
+		: _node(other._node), _size(other._size), data_alloc(std::move(other.data_alloc)) {
+		other._resert();
+	}
 
 	list(list&& other, const Allocator& alloc)
-		: _node(other._node), _size(other._size), data_alloc(alloc) {}
+		: _node(other._node), _size(other._size), data_alloc(alloc) {
+		other._resert();
+	}
 
 
-	list(std::initializer_list<T> init, const Allocator& alloc = Allocator());
+	list(std::initializer_list<T> init, const Allocator& alloc = Allocator()) {
+		empty_init();
+		insert_aux_iterator(end(), init.begin(), init.end());
+	}
 
 	//析构函数
 	~list() {
 		free_nodes();
+		data_alloc.deallocate(_node);
 	}
 
 
+	//复值函数
+	list& operator=(const list& other) {
+		free_nodes();
+		copy_list(other);
+	}
 
+	list& operator=(list&& other) noexcept {
+		_size = other._size;
+		_node = other._node;
+		data_alloc = std::move(other.data_alloc);
+		other._resert();
+	}
 
+	list& operator=(std::initializer_list<T> ilist) {
+		free_nodes();
+		insert_aux_iterator(end(), ilist.begin(), ilist.end());
+	}
 	//元素访问
-	reference front() { return _head->data; }
-	const_reference front() const { return _head->data; }
-	reference back() { return _back->data; }
-	const_reference back() const { return _back->data; }
+	reference front() { return *begin();}
+	const_reference front() const { return *begin(); }
+	reference back() {
+		iterator it = end();
+		it--;
+		return *it;
+	}
+	const_reference back() const {
+		iterator it = end();
+		it--;
+		return *it;
+	}
 
 	//迭代器
 	iterator begin() noexcept { return iterator(_head); }
@@ -199,82 +341,76 @@ public:
 		free_nodes(); 
 	}
 	void push_back(const T& value) {
-		if (_size) {
-			_back = create_node(_back, nullptr, value);
-		} else {
-			create_first_node(value);
-		}
-		_size++;
+		insert_aux_args(end(), value);
 	}
 	void push_back(T&& value) {
-		if (_size) {
-			_back = create_node(_back, nullptr, std::move(value));
-		} else {
-			create_first_node(std::move(value));
-		}
-		_size++;
+		insert_aux_args(end(), std::move(value));
 	}
 	template< class... Args >
 	reference emplace_back(Args&&... args) {
-		if (_size) {
-			_back = create_first_node(_back, nullptr, std::forward<Args>(args)...);
-		} else {
-			create_first_node(std::forward<Args>(args)...);
-		}
-		_size++;
+		insert_aux_args(end(), std::forward<Args>(args)...);
 	}
 	void pop_back() {
-		_size--;
-		node* prev = _back->prev;
-		destory_node(_back);
-		_back = prev;
+		iterator it = end();
+		it--;
+		_erase(it);
 	}
 	void push_front(const T& value) {
-		if (_size) {
-			_head = create_node(nullptr, _head, value);
-		} else {
-			create_first_node(value);
-		}
-		_size++;
+		insert_aux_args(begin(), value);
 	}
 	void push_front(T&& value) {
-		if (_size) {
-			_head = create_node(nullptr, _head, std::move(value));
-		} else {
-			create_first_node(std::move(value));
-		}
-		_size++;
+		insert_aux_args(begin(), std::move(value));
 	}
 	template< class... Args >
 	reference emplace_front(Args&&... args) {
-		if (_size) {
-			_head = create_node(nullptr, _head, std::forward<Args>(args)...);
-		} else {
-			create_first_node(std::forward<Args>(args)...);
-		}
-		_size++;
+		insert_aux_args(begin(), std::forward<Args>(args)...);
 	}
 	void pop_front() {
-		_size--;
-		node*next = _head->next;
-		destory_node(_head);
-		_head = next;
+		_erase(begin());
 	}
 	iterator erase(const_iterator pos) {
-		
+		return _erase(pos);
+	}
+	iterator erase(const_iterator first, const_iterator last) {
+		return _erase_n(first, last);
+	}
+	iterator insert(const_iterator pos, const T& value) {
+		return insert_aux_args(pos, value);
+	}
+	iterator insert(const_iterator pos, T&& value) {
+		return insert_aux_args(pos, std::move(value));
+	}
+	iterator insert(const_iterator pos, size_type count, const T& value) {
+		return insert_aux_n(pos, count, value);
+	}
+	template< class InputIt >
+	iterator insert(const_iterator pos, InputIt first, InputIt last) {
+		return insert_aux_iterator(pos, first, last);
+	}
+	iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
+		return insert_aux_iterator(pos, ilist.begin(), ilist.end());
+	}
+	void resize(size_type count) {
+		if (count < _size) {
+			iterator last = end();
+			int c = count;
+			c = -c;
+			iterator first = LightSTL::advance(last, c);
+			erase(first, last);
+		} else {
+
+		}
+	}
+	void resize(size_type count, const value_type& value) {
+		if (count < _size) {
+
+		} else {
+
+		}
 	}
 	void swap(list& other) noexcept {
-		size_type tmp_size = _size;
-		_size = other._size;
-		other._size = tmp_size;
-
-		node* tmp_node = _head;
-		_head = other._head;
-		other._head = tmp_node;
-
-		tmp_node = _back;
-		_back = other._back;
-		other._back = tmp_node;
+		_swap(_node, other._node);
+		_swap(_size, other._size);
 	}
 
 
