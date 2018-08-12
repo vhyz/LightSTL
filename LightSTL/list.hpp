@@ -7,6 +7,10 @@
 #include"iterator/iterator.hpp"
 #include"memory/addressof.hpp"
 
+namespace LightSTL {
+
+
+
 
 namespace detail {
 	template<class T>
@@ -22,14 +26,26 @@ namespace detail {
 	};
 
 	template<class T>
+	struct remove_const {
+		using value = T;
+	};
+
+	template<class T>
+	struct remove_const<const T> {
+		using value = T;
+	};
+
+	template<class T>
 	class list_iterator: public LightSTL::iterator<LightSTL::bidirectional_iterator_tag,T> {
 
 		template<class T>
-		friend node<T> get_node(list_iterator<T> it);
+		friend typename list_iterator<T>::list_node* get_node(list_iterator<T> it);
 
+		template<class Y>
+		friend class list_iterator;
 	private:
-
-		using list_node = node<T>;
+		using element_type = typename remove_const<T>::value;
+		using list_node = node<element_type>;
 
 		list_node* n;
 
@@ -38,7 +54,8 @@ namespace detail {
 		list_iterator(list_node* x)
 			: n(x)  {}
 
-		list_iterator(const list_iterator& other)
+		template<class Y>
+		list_iterator(const list_iterator<Y>& other)
 			: n(other.n)  {}
 
 		T& operator*()const  { return n->data; }
@@ -54,7 +71,7 @@ namespace detail {
 			n = n->next;
 			return res;
 		}
-
+		
 		list_iterator operator--() {
 			n = n->prev;
 			return *this;
@@ -68,15 +85,17 @@ namespace detail {
 
 		bool operator==(const list_iterator& other)const { return n == other.n; }
 		bool operator!=(const list_iterator& other)const { return n != other.n; }
+
+		
 	};
 
 	template<class T>
-	node<T> get_node(list_iterator<T> it) {
+	typename list_iterator<T>::list_node* get_node(list_iterator<T> it) {
 		return it.n;
 	}
 }
 
-template<class T,class Allocator = LightSTL::allocator<T> >
+template<class T,class Allocator = LightSTL::allocator<detail::node<T>> >
 class list {
 
 public:
@@ -87,8 +106,8 @@ public:
 	using difference_type = std::ptrdiff_t;
 	using reference = T & ;
 	using const_reference = const T&;
-	using pointer = Allocator::pointer;
-	using const_pointer = Allocator::const_pointer;
+	using pointer = typename Allocator::pointer;
+	using const_pointer = typename Allocator::const_pointer;
 	using iterator = detail::list_iterator<T>;
 	using const_iterator = detail::list_iterator<const T>;
 	using reverse_iterator = LightSTL::reverse_iterator<iterator>;
@@ -122,7 +141,7 @@ private:
 		for (size_type i = 0; i < _size; ++i) {
 			node*tmp = cur->next;
 			destory_node(cur);
-			_node = tmp;
+			cur = tmp;
 		}
 		_size = 0;
 		_node->next = _node;
@@ -131,11 +150,11 @@ private:
 
 	node* _node;
 	size_type _size;
-	LightSTL::allocator<T> data_alloc;
+	LightSTL::allocator<detail::node<T>> data_alloc;
 
 	template<class It>
 	iterator insert_aux_iterator(const_iterator pos, It start, It last) {
-		node* pre, cur;
+		node *pre, *cur;
 		node* pos_address = detail::get_node(pos);
 		pre = pos_address->prev;
 		node* res_pre = pre;
@@ -159,7 +178,7 @@ private:
 
 
 	iterator insert_aux_n(const_iterator pos, size_type n, const T& val) {
-		node* pre, cur;
+		node *pre, *cur;
 		node* pos_address = detail::get_node(pos);
 		pre = pos_address->prev;
 		node* res_pre = pre;
@@ -173,7 +192,7 @@ private:
 	}
 
 	iterator insert_aux_n_default(const_iterator pos, size_type n) {
-		node* pre, cur;
+		node  pre, *cur;
 		node* pos_address = detail::get_node(pos);
 		pre = pos_address->prev;
 		node* res_pre = pre;
@@ -304,6 +323,20 @@ public:
 		free_nodes();
 		insert_aux_iterator(end(), ilist.begin(), ilist.end());
 	}
+	void assign(size_type count, const T& value) {
+		free_nodes();
+		insert_aux_n(end(), count, value);
+	}
+	template< class InputIt >
+	void assign(InputIt first, InputIt last) {
+		free_nodes();
+		insert_aux_iterator(end(), first, last);
+	}
+	void assign(std::initializer_list<T> ilist) {
+		free_nodes();
+		insert_aux_iterator(end(), ilist.begin(), ilist.end());
+	}
+	allocator_type get_allocator() const { return data_alloc; }
 	//元素访问
 	reference front() { return *begin();}
 	const_reference front() const { return *begin(); }
@@ -319,13 +352,29 @@ public:
 	}
 
 	//迭代器
-	iterator begin() noexcept { return iterator(_head); }
-	const_iterator begin() const noexcept { return const_iterator(_head); }
-	const_iterator cbegin() const noexcept { return const_iterator(_head); }
-	iterator end() noexcept { return iterator(nullptr); }
-	const_iterator end() const noexcept { return const_iterator(nullptr); }
-	const_iterator cend() const noexcept { return const_iterator(nullptr); }
-	reverse_iterator rbegin() noexcept { return reverse_iterator(_back); }
+	iterator begin() noexcept {
+		iterator it = end();
+		++it;
+		return it;
+	}
+	const_iterator begin() const noexcept {
+		return cbegin();
+	}
+	const_iterator cbegin() const noexcept {
+		const_iterator it = cend();
+		++it;
+		return it;
+	}
+	iterator end() noexcept {
+		return iterator(_node);
+	}
+	const_iterator end() const noexcept {
+		return cend();
+	}
+	const_iterator cend() const noexcept {
+		return const_iterator(_node);
+	}
+	reverse_iterator rbegin() noexcept;
 	const_reverse_iterator rbegin() const noexcept;
 	const_reverse_iterator crbegin() const noexcept;
 	reverse_iterator rend() noexcept;
@@ -393,19 +442,25 @@ public:
 	void resize(size_type count) {
 		if (count < _size) {
 			iterator last = end();
-			int c = count;
-			c = -c;
-			iterator first = LightSTL::advance(last, c);
+			iterator first = last;
+			while (count--) {
+				--first;
+			}
 			erase(first, last);
 		} else {
-
+			insert_aux_n_default(end(), count - _size);
 		}
 	}
 	void resize(size_type count, const value_type& value) {
 		if (count < _size) {
-
+			iterator last = end();
+			iterator first = last;
+			while (count--) {
+				--first;
+			}
+			erase(first, last);
 		} else {
-
+			insert_aux_n(end(), count - _size, value);
 		}
 	}
 	void swap(list& other) noexcept {
@@ -415,5 +470,7 @@ public:
 
 
 };
+
+}
 
 #endif // !LIST_HPP

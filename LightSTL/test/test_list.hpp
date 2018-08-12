@@ -4,15 +4,24 @@
 
 #include<list>
 #include<iostream>
-
+#include"../list.hpp"
 namespace TEST_LIST {
 
+	template<typename L>
+	void show_list(const L& list) {
+		for (auto &i : list)
+			std::cout << i << " ";
+		std::cout << "\n";
+	}
 
 	void test_list() {
-		std::list<int>std_list = { 1,2,3,4,5 };
-		auto it = std_list.end();
-		it--;
-		std::cout << *it;
+		LightSTL::list<int>list = { 1,2,3,4,5 };
+		show_list(list);
+		list.insert(list.begin(), 3);
+		list.insert(list.begin(), 4);
+		show_list(list);
+		list.erase(list.begin());
+		show_list(list);
 	}
 }
 
