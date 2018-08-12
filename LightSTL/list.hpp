@@ -209,8 +209,8 @@ private:
 	}
 
 	//转移资源时使用函数
-	void _resert() {
-		_node = nullptr;
+	void _resert(node* n) {
+		_node = n;
 		_size = 0;
 	}
 
@@ -241,6 +241,13 @@ private:
 		destory_node(n);
 		_size -= 1;
 		return iterator(res);
+	}
+
+	void move_aux(list&& other) {
+		node*tmp = other._node;
+		_size = other._size;
+		other._resert(_node);
+		_node = tmp;
 	}
 public:
 	//构造函数
@@ -280,17 +287,19 @@ public:
 	list(const list& other, const Allocator& alloc)
 		: data_alloc(alloc) {
 		empty_init();
-		copy_list();
+		copy_list(other);
 	}
 
 	list(list&& other)
-		: _node(other._node), _size(other._size), data_alloc(std::move(other.data_alloc)) {
-		other._resert();
+		:  data_alloc(std::move(other.data_alloc)) {
+		empty_init();
+		move_aux(std::move(other));
 	}
 
 	list(list&& other, const Allocator& alloc)
-		: _node(other._node), _size(other._size), data_alloc(alloc) {
-		other._resert();
+		: data_alloc(alloc) {
+		empty_init();
+		move_aux(std::move(other));
 	}
 
 
@@ -308,15 +317,18 @@ public:
 
 	//复值函数
 	list& operator=(const list& other) {
+		if (&other == this)
+			return *this;
 		free_nodes();
 		copy_list(other);
 	}
 
 	list& operator=(list&& other) noexcept {
-		_size = other._size;
-		_node = other._node;
+		if (&other == this)
+			return *this;
 		data_alloc = std::move(other.data_alloc);
-		other._resert();
+		free_nodes();
+		move_aux(std::move(other));
 	}
 
 	list& operator=(std::initializer_list<T> ilist) {
@@ -468,8 +480,62 @@ public:
 		_swap(_size, other._size);
 	}
 
-
 };
+
+
+template< class T, class Alloc >
+bool operator==(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	if (lhs.size() != rhs.size())
+		return false;
+	auto lhs_begin = lhs.begin(), rhs_begin = rhs.begin();
+	size_t len = lhs.size();
+	for (size_t i = 0; i < len; ++i, ++lhs_begin, ++rhs_begin)
+		if (*lhs != *rhs)
+			return false;
+	return true;
+}
+template< class T, class Alloc >
+bool operator!=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	return !(lhs == rhs);
+}
+template< class T, class Alloc >
+bool operator<(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	if (lhs.size() < rhs.size())
+		return true;
+	else if (lhs.size() > rhs.size())
+		return false;
+	else {
+		auto lhs_begin = lhs.begin(), rhs_begin = rhs.begin();
+		size_t len = lhs.size();
+		for (size_t i = 0; i < len; ++i, ++lhs_begin, ++rhs_begin)
+			if (*lhs >= *rhs)
+				return false;
+		return true;
+	}
+}
+template< class T, class Alloc >
+bool operator>(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	if (lhs.size() > rhs.size())
+		return true;
+	else if (lhs.size() < rhs.size())
+		return false;
+	else {
+		auto lhs_begin = lhs.begin(), rhs_begin = rhs.begin();
+		size_t len = lhs.size();
+		for (size_t i = 0; i < len; ++i, ++lhs_begin, ++rhs_begin)
+			if (*lhs <= *rhs)
+				return false;
+		return true;
+	}
+}
+template< class T, class Alloc >
+bool operator<=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	return !(lhs > rhs);
+}
+template< class T, class Alloc >
+bool operator>=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
+	return !(lhs < rhs);
+}
 
 }
 
