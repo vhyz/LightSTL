@@ -199,6 +199,7 @@ private:
 		while (n--) {
 			cur = create_node(pre, pos_address);
 			pre->next = cur;
+			pre = cur;
 			_size += 1;
 		}
 		return res_pre->next;
@@ -401,56 +402,72 @@ public:
 	void clear() noexcept { 
 		free_nodes(); 
 	}
+
 	void push_back(const T& value) {
 		insert_aux_args(end(), value);
 	}
+
 	void push_back(T&& value) {
 		insert_aux_args(end(), std::move(value));
 	}
+
 	template< class... Args >
 	reference emplace_back(Args&&... args) {
 		insert_aux_args(end(), std::forward<Args>(args)...);
 	}
+
 	void pop_back() {
 		iterator it = end();
 		it--;
 		_erase(it);
 	}
+
 	void push_front(const T& value) {
 		insert_aux_args(begin(), value);
 	}
+
 	void push_front(T&& value) {
 		insert_aux_args(begin(), std::move(value));
 	}
+
 	template< class... Args >
 	reference emplace_front(Args&&... args) {
 		insert_aux_args(begin(), std::forward<Args>(args)...);
 	}
+
 	void pop_front() {
 		_erase(begin());
 	}
+
 	iterator erase(const_iterator pos) {
 		return _erase(pos);
 	}
+
 	iterator erase(const_iterator first, const_iterator last) {
 		return _erase_n(first, last);
 	}
+
 	iterator insert(const_iterator pos, const T& value) {
 		return insert_aux_args(pos, value);
 	}
+
 	iterator insert(const_iterator pos, T&& value) {
 		return insert_aux_args(pos, std::move(value));
 	}
+
 	iterator insert(const_iterator pos, size_type count, const T& value) {
 		return insert_aux_n(pos, count, value);
 	}
+
 	template< class InputIt >
 	iterator insert(const_iterator pos, InputIt first, InputIt last) {
 		return insert_aux_iterator(pos, first, last);
 	}
+
 	iterator insert(const_iterator pos, std::initializer_list<T> ilist) {
 		return insert_aux_iterator(pos, ilist.begin(), ilist.end());
 	}
+
 	void resize(size_type count) {
 		if (count < _size) {
 			iterator last = end();
@@ -463,6 +480,7 @@ public:
 			insert_aux_n_default(end(), count - _size);
 		}
 	}
+
 	void resize(size_type count, const value_type& value) {
 		if (count < _size) {
 			iterator last = end();
@@ -475,6 +493,7 @@ public:
 			insert_aux_n(end(), count - _size, value);
 		}
 	}
+
 	void swap(list& other) noexcept {
 		_swap(_node, other._node);
 		_swap(_size, other._size);

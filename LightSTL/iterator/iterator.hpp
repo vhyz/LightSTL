@@ -3,6 +3,7 @@
 
 #include<cstddef>
 #include"iterator_traits.hpp"
+#include"../memory/addressof.hpp"
 
 namespace LightSTL {
 
@@ -20,32 +21,7 @@ template<
 	using reference = Reference;
 };
 
-template< class Iterator >
-class reverse_iterator : public iterator<input_iterator_tag,Iterator> {
-public:
 
-	using iterator_type	= Iterator;
-
-	constexpr reverse_iterator() {}
-
-	constexpr explicit reverse_iterator(Iterator x) {
-		current = x;
-	}
-
-	template< class U >
-	constexpr reverse_iterator(const reverse_iterator<U>& other) {
-		current = other.base();
-	}
-
-	template< class U >
-	constexpr reverse_iterator& operator=(const reverse_iterator<U>& other) {
-		current = other.base();
-	}
-
-
-protected:
-	Iterator current;
-};
 
 
 namespace detail {
@@ -80,6 +56,120 @@ constexpr void advance(InputIt& it, Distance n) {
 	using category = typename iterator_traits<InputIt>::iterator_category;
 }
 
+
+template< class Iterator >
+class reverse_iterator : public iterator<input_iterator_tag, Iterator> {
+public:
+
+	using iterator_type = Iterator;
+
+	constexpr reverse_iterator() {}
+
+	constexpr explicit reverse_iterator(Iterator x) {
+		current = x;
+	}
+
+	template< class U >
+	constexpr reverse_iterator(const reverse_iterator<U>& other) {
+		current = other.base();
+	}
+
+	template< class U >
+	constexpr reverse_iterator& operator=(const reverse_iterator<U>& other) {
+		current = other.base();
+	}
+
+	constexpr Iterator base() const {
+		return current;
+	}
+
+	constexpr reference operator*() const {
+		Iterator tmp = current;
+		return *--tmp;
+	}
+
+	constexpr pointer operator->() const {
+		LightSTL::addressof(operator*());
+	}
+
+	constexpr reverse_iterator& operator++() {
+		current--;
+		return *this;
+	}
+	constexpr reverse_iterator& operator--() {
+		current++;
+		return *this;
+	}
+	constexpr reverse_iterator operator++(int) {
+		reverse_iterator res = *this;
+		current--;
+		return res;
+	}
+	constexpr reverse_iterator operator--(int) {
+		reverse_iterator res = *this;
+		current++;
+		return res;
+	}
+	constexpr reverse_iterator operator+(difference_type n) const {
+		reverse_iterator res = *this;
+		LightSTL::advance(current, -n);
+		return res;
+	}
+	constexpr reverse_iterator operator-(difference_type n) const {
+		reverse_iterator res = *this;
+		LightSTL::advance(current, n);
+	}
+	constexpr reverse_iterator& operator+=(difference_type n) {
+		LightSTL::advance(current, -n);
+		return *this;
+	}
+	constexpr reverse_iterator& operator-=(difference_type n) {
+		LightSTL::advance(current, n);
+		return *this;
+	}
+
+protected:
+	Iterator current;
+};
+
+
+template< class Iterator1, class Iterator2 >
+constexpr auto operator-(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs
+	) -> decltype(rhs.base() - lhs.base()) {
+	return rhs.base() - lhs.base();
+}
+
+template< class Iterator1, class Iterator2 >
+constexpr bool operator==(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() == rhs.base();
+}
+template< class Iterator1, class Iterator2 >
+constexpr bool operator!=(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() != rhs.base();
+}
+template< class Iterator1, class Iterator2 >
+constexpr bool operator<(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() < rhs.base();
+}
+template< class Iterator1, class Iterator2 >
+constexpr bool operator<=(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() <= rhs.base();
+}
+template< class Iterator1, class Iterator2 >
+constexpr bool operator>(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() > rhs.base();
+}
+template< class Iterator1, class Iterator2 >
+constexpr bool operator>=(const reverse_iterator<Iterator1>& lhs,
+	const reverse_iterator<Iterator2>& rhs) {
+	return lhs.base() >= rhs.base();
+}
 
 }
 #endif // !ITERATOR_HPP

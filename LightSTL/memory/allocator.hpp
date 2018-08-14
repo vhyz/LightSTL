@@ -48,6 +48,7 @@ public:
 	static inline void construct(T* ptr, Args&&... args) {
 		new (ptr) T(std::forward<Args>(args)...);
 	}
+
 	static inline void destory(T* ptr) {
 		ptr->~T();
 	}
