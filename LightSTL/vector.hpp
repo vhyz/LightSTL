@@ -297,15 +297,15 @@ public:
 	iterator end()                                  { return finish;}
 	const_iterator end() const noexcept             { return finish;}
 	const_iterator cend() const noexcept            { return finish;}
-	reverse_iterator rbegin() noexcept              { return reverse_iterator(finish - 1);      }
-	const_reverse_iterator rbegin() const noexcept  { return const_reverse_iterator(finish - 1);}
-	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish - 1);}
-	reverse_iterator rend() noexcept                { return reverse_iterator(start - 1);       }
-	const_reverse_iterator rend() const noexcept    { return const_reverse_iterator(start - 1 );}
-	const_reverse_iterator crend() const noexcept   { return const_reverse_iterator(start - 1); }
+	reverse_iterator rbegin() noexcept              { return reverse_iterator(finish);      }
+	const_reverse_iterator rbegin() const noexcept  { return const_reverse_iterator(finish);}
+	const_reverse_iterator crbegin() const noexcept { return const_reverse_iterator(finish);}
+	reverse_iterator rend() noexcept                { return reverse_iterator(start);       }
+	const_reverse_iterator rend() const noexcept    { return const_reverse_iterator(start);}
+	const_reverse_iterator crend() const noexcept   { return const_reverse_iterator(start); }
 
 	bool empty() const noexcept {
-		return start == nullptr;
+		return size() == 0;
 	}
 
 	void reserve(size_type new_cap) {
@@ -409,6 +409,58 @@ public:
 		}
 	}
 };
+
+template< class T, class Alloc >
+bool operator==(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	if (lhs.size() != rhs.size())
+		return false;
+	size_t len = lhs.size();
+	for (size_t i = 0; i < len; ++i)
+		if (lhs[i] != rhs[i])
+			return false;
+	return true;
+}
+template< class T, class Alloc >
+bool operator!=(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	return !(rhs == lhs);
+}
+template< class T, class Alloc >
+bool operator<(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	if (lhs.size() >= rhs.size())
+		return false;
+	size_t len = lhs.size();
+	for (size_t i = 0; i < len; ++i)
+		if (lhs[i] >= rhs[i])
+			return false;
+	return true;
+}
+template< class T, class Alloc >
+bool operator>(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	if (lhs.size() <= rhs.size())
+		return false;
+	size_t len = lhs.size();
+	for (size_t i = 0; i < len; ++i)
+		if (lhs[i] <= rhs[i])
+			return false;
+	return true;
+}
+template< class T, class Alloc >
+bool operator<=(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	return !(lhs > rhs);
+}
+
+template< class T, class Alloc >
+bool operator>=(const vector<T, Alloc>& lhs,
+	const vector<T, Alloc>& rhs) {
+	return !(lhs < rhs);
+}
+
+
 
 
 }

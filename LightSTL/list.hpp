@@ -152,59 +152,16 @@ private:
 	size_type _size;
 	LightSTL::allocator<detail::node<T>> data_alloc;
 
+private:
+	//四种插入辅助函数
 	template<class It>
-	iterator insert_aux_iterator(const_iterator pos, It start, It last) {
-		node *pre, *cur;
-		node* pos_address = detail::get_node(pos);
-		pre = pos_address->prev;
-		node* res_pre = pre;
-		for (; start != last; ++start) {
-			cur = create_node(pre, pos_address, *start);
-			pre->next = cur;
-			pre = cur;
-			_size += 1;
-		}
-		return res_pre->next;
-	}
-
+	iterator insert_aux_iterator(const_iterator pos, It start, It last);
 	template<class... Args>
-	iterator insert_aux_args(const_iterator pos, Args&&... args) {
-		node* pos_address = detail::get_node(pos);
-		node* pre = pos_address->prev;
-		pre->next = create_node(pre, pos_address, std::forward<Args>(args)...);
-		_size += 1;
-		return pre->next;
-	}
+	iterator insert_aux_args(const_iterator pos, Args&&... args);
+	iterator insert_aux_n(const_iterator pos, size_type n, const T& val);
+	iterator insert_aux_n_default(const_iterator pos, size_type n);
 
-
-	iterator insert_aux_n(const_iterator pos, size_type n, const T& val) {
-		node *pre, *cur;
-		node* pos_address = detail::get_node(pos);
-		pre = pos_address->prev;
-		node* res_pre = pre;
-		while (n--) {
-			cur = create_node(pre, pos_address, val);
-			pre->next = cur;
-			pre = cur;
-			_size += 1;
-		}
-		return res_pre->next;
-	}
-
-	iterator insert_aux_n_default(const_iterator pos, size_type n) {
-		node  pre, *cur;
-		node* pos_address = detail::get_node(pos);
-		pre = pos_address->prev;
-		node* res_pre = pre;
-		while (n--) {
-			cur = create_node(pre, pos_address);
-			pre->next = cur;
-			pre = cur;
-			_size += 1;
-		}
-		return res_pre->next;
-	}
-
+private:
 	void copy_list(const list& other) {
 		insert_aux_iterator(end(), other.begin(), other.end());
 	}
@@ -221,6 +178,9 @@ private:
 		lhs = rhs;
 		rhs = tmp;
 	}
+
+
+private:
 
 	iterator _erase_n(const_iterator s, const_iterator l) {
 		node* start = detail::get_node(s), last = detail::get_node(l);
@@ -387,12 +347,24 @@ public:
 	const_iterator cend() const noexcept {
 		return const_iterator(_node);
 	}
-	reverse_iterator rbegin() noexcept;
-	const_reverse_iterator rbegin() const noexcept;
-	const_reverse_iterator crbegin() const noexcept;
-	reverse_iterator rend() noexcept;
-	const_reverse_iterator rend() const noexcept;
-	const_reverse_iterator crend() const noexcept;
+	reverse_iterator rbegin() noexcept {
+		return reverse_iterator(end());
+	}
+	const_reverse_iterator rbegin() const noexcept {
+		return const_reverse_iterator(cend());
+	}
+	const_reverse_iterator crbegin() const noexcept {
+		return const_reverse_iterator(cend());
+	}
+	reverse_iterator rend() noexcept {
+		return reverse_iterator(begin());
+	}
+	const_reverse_iterator rend() const noexcept {
+		return const_reverse_iterator(cbegin());
+	}
+	const_reverse_iterator crend() const noexcept {
+		return const_reverse_iterator(cbegin());
+	}
 	
 	//容量
 	bool empty() const noexcept { return _size == 0; }
@@ -554,6 +526,66 @@ bool operator<=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, All
 template< class T, class Alloc >
 bool operator>=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, Alloc>& rhs) {
 	return !(lhs < rhs);
+}
+
+
+
+
+
+template<class T, class Allocator>
+template<class It>
+inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_iterator(const_iterator pos, It start, It last) {
+	node *pre, *cur;
+	node* pos_address = detail::get_node(pos);
+	pre = pos_address->prev;
+	node* res_pre = pre;
+	for (; start != last; ++start) {
+		cur = create_node(pre, pos_address, *start);
+		pre->next = cur;
+		pre = cur;
+		_size += 1;
+	}
+	return res_pre->next;
+}
+
+template<class T, class Allocator>
+template<class ...Args>
+inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_args(const_iterator pos, Args && ...args) {
+	node* pos_address = detail::get_node(pos);
+	node* pre = pos_address->prev;
+	pre->next = create_node(pre, pos_address, std::forward<Args>(args)...);
+	_size += 1;
+	return pre->next;
+}
+
+template<class T, class Allocator>
+inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_n(const_iterator pos, size_type n, const T & val) {
+	node *pre, *cur;
+	node* pos_address = detail::get_node(pos);
+	pre = pos_address->prev;
+	node* res_pre = pre;
+	while (n--) {
+		cur = create_node(pre, pos_address, val);
+		pre->next = cur;
+		pre = cur;
+		_size += 1;
+	}
+	return res_pre->next;
+}
+
+template<class T, class Allocator>
+inline list<T, Allocator>::iterator LightSTL::list<T, Allocator>::insert_aux_n_default(const_iterator pos, size_type n) {
+	node  pre, *cur;
+	node* pos_address = detail::get_node(pos);
+	pre = pos_address->prev;
+	node* res_pre = pre;
+	while (n--) {
+		cur = create_node(pre, pos_address);
+		pre->next = cur;
+		pre = cur;
+		_size += 1;
+	}
+	return res_pre->next;
 }
 
 }

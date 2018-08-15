@@ -235,7 +235,7 @@ private:
 
 	template<typename Y, std::enable_if_t<std::is_base_of_v<enable_shared_from_this<Y>,Y>,int> = 0>
 	void _shared_from_this(Y* p) {
-			p->_internal_accept_owner(*this);
+		p->_internal_accept_owner(*this);
 	}
 
 
