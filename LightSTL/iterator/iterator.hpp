@@ -46,11 +46,6 @@ inline typename iterator_traits<InputIt>::difference_type distance(InputIt first
 }
 
 
-namespace detail {
-
-}
-
-
 template< class InputIt, class Distance >
 constexpr void advance(InputIt& it, Distance n) {
 	using category = typename iterator_traits<InputIt>::iterator_category;
@@ -58,10 +53,15 @@ constexpr void advance(InputIt& it, Distance n) {
 
 
 template< class Iterator >
-class reverse_iterator : public iterator<input_iterator_tag, Iterator> {
+class reverse_iterator{
 public:
 
 	using iterator_type = Iterator;
+	using value_type = typename LightSTL::iterator_traits<Iterator>::value_type;
+	using difference_type = typename LightSTL::iterator_traits<Iterator>::difference_type;
+	using pointer = typename LightSTL::iterator_traits<Iterator>::pointer;
+	using reference = typename LightSTL::iterator_traits<Iterator>::reference;
+	using iterator_category = typename LightSTL::iterator_traits<Iterator>::iterator_category;
 
 	constexpr reverse_iterator() {}
 

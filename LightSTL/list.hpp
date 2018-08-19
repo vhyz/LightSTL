@@ -36,13 +36,19 @@ namespace detail {
 	};
 
 	template<class T>
-	class list_iterator: public LightSTL::iterator<LightSTL::bidirectional_iterator_tag,T> {
-
+	class list_iterator {
 		template<class T>
 		friend typename list_iterator<T>::list_node* get_node(list_iterator<T> it);
 
 		template<class Y>
 		friend class list_iterator;
+	public:
+		//typedefs
+		using iterator_category = LightSTL::bidirectional_iterator_tag;
+		using value_type = T;
+		using difference_type = std::ptrdiff_t;
+		using pointer = T * ;
+		using reference = T & ;
 	private:
 		using element_type = typename remove_const<T>::value;
 		using list_node = node<element_type>;
@@ -263,7 +269,6 @@ public:
 		move_aux(std::move(other));
 	}
 
-
 	list(std::initializer_list<T> init, const Allocator& alloc = Allocator()) {
 		empty_init();
 		insert_aux_iterator(end(), init.begin(), init.end());
@@ -296,20 +301,25 @@ public:
 		free_nodes();
 		insert_aux_iterator(end(), ilist.begin(), ilist.end());
 	}
+
 	void assign(size_type count, const T& value) {
 		free_nodes();
 		insert_aux_n(end(), count, value);
 	}
+
 	template< class InputIt >
 	void assign(InputIt first, InputIt last) {
 		free_nodes();
 		insert_aux_iterator(end(), first, last);
 	}
+
 	void assign(std::initializer_list<T> ilist) {
 		free_nodes();
 		insert_aux_iterator(end(), ilist.begin(), ilist.end());
 	}
+
 	allocator_type get_allocator() const { return data_alloc; }
+
 	//元素访问
 	reference front() { return *begin();}
 	const_reference front() const { return *begin(); }
@@ -534,7 +544,7 @@ bool operator>=(const LightSTL::list<T, Alloc>& lhs, const LightSTL::list<T, All
 
 template<class T, class Allocator>
 template<class It>
-inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_iterator(const_iterator pos, It start, It last) {
+inline typename list<T, Allocator>::iterator list<T, Allocator>::insert_aux_iterator(const_iterator pos, It start, It last) {
 	node *pre, *cur;
 	node* pos_address = detail::get_node(pos);
 	pre = pos_address->prev;
@@ -550,7 +560,7 @@ inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_iterator(cons
 
 template<class T, class Allocator>
 template<class ...Args>
-inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_args(const_iterator pos, Args && ...args) {
+inline typename list<T, Allocator>::iterator list<T, Allocator>::insert_aux_args(const_iterator pos, Args && ...args) {
 	node* pos_address = detail::get_node(pos);
 	node* pre = pos_address->prev;
 	pre->next = create_node(pre, pos_address, std::forward<Args>(args)...);
@@ -559,7 +569,7 @@ inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_args(const_it
 }
 
 template<class T, class Allocator>
-inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_n(const_iterator pos, size_type n, const T & val) {
+inline typename list<T, Allocator>::iterator list<T, Allocator>::insert_aux_n(const_iterator pos, size_type n, const T & val) {
 	node *pre, *cur;
 	node* pos_address = detail::get_node(pos);
 	pre = pos_address->prev;
@@ -574,7 +584,7 @@ inline list<T, Allocator>::iterator list<T, Allocator>::insert_aux_n(const_itera
 }
 
 template<class T, class Allocator>
-inline list<T, Allocator>::iterator LightSTL::list<T, Allocator>::insert_aux_n_default(const_iterator pos, size_type n) {
+inline typename list<T, Allocator>::iterator LightSTL::list<T, Allocator>::insert_aux_n_default(const_iterator pos, size_type n) {
 	node  pre, *cur;
 	node* pos_address = detail::get_node(pos);
 	pre = pos_address->prev;

@@ -34,7 +34,7 @@ private:
 	iterator start;
 	iterator finish;
 	iterator end_of_storage;
-	LightSTL::allocator<T>data_alloc;
+	Allocator data_alloc;
 
 	void _free_data() {
 		if (start) {
