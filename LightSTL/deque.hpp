@@ -26,6 +26,8 @@ namespace detail {
 	template<class T, size_t BufSiz = 0>
 	class deque_iterator {
 
+		template<class T,size_t BufSize = 0>
+		friend class deque_iterator;
 	public:		
 		//iterator typedefs
 		using iterator_category = LightSTL::random_access_iterator_tag;
@@ -52,6 +54,22 @@ namespace detail {
 			last = first + difference_type(buf_size());
 		}
 	public:
+
+		deque_iterator()
+			: cur(nullptr), first(nullptr), last(nullptr),node(nullptr) {}
+
+		template<class Y>
+		deque_iterator(const deque_iterator<Y,BufSiz>& other )
+			: cur(other.cur), first(other.first), last(other.last), node(other.node)  {}
+
+		template<class Y>
+		deque_iterator& operator=(const deque_iterator<Y, BufSiz>& other) {
+			cur = other.cur;
+			first = other.first;
+			last = other.last;
+			node = other.node;
+		}
+
 		reference operator*()const { return *cur; }
 		pointer operator->()const { return cur; }
 
@@ -138,15 +156,38 @@ namespace detail {
 template<class T,class Allocator = LightSTL::allocator<T> >
 class deque {
 public:
+
+	//typedefs
 	using value_type = T;
 	using allocator_type = Allocator;
 	using size_type = std::size_t;
 	using difference_type = std::ptrdiff_t;
 	using reference = value_type & ;
 	using const_reference = const value_type&;
-	using pointer = Ligh
+	using pointer = T * ;
+	using const_pointer = const T*;
+	using iterator = detail::deque_iterator<T>;
+	using const_iterator = detail::deque_iterator<const T>;
+	using reverse_iterator = LightSTL::reverse_iterator<iterator>;
+	using const_reverse_iterator = LightSTL::reverse_iterator<const_iterator>;
+
 private:
 
+	using map_pointer = T * *;
+	//数据成员
+	iterator start;
+	iterator finish;
+	//缓冲区管控
+	map_pointer map;
+	size_type map_size;
+
+public:
+
+	deque()
+		: start(), finish(), map(nullptr), map_size(0) {}
+
+
+	explicit deque(const Allocator& alloc);
 };
 
 
