@@ -6,9 +6,10 @@
 template< class Alloc >
 struct allocator_traits {
 	using allocator_type = Alloc;
-	using value_type = Alloc::value_type;
-	using pointer = value_type * ;
-	using const_pointer = 
+	using value_type = typename Alloc::value_type;
+	using pointer = typename Alloc::pointer;
+	using const_pointer = typename Alloc::const_pointer;
+	using difference_type = typename Alloc::difference_type; 
 };
 
 
