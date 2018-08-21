@@ -18,15 +18,10 @@ namespace detail {
 		using value = T;
 	};
 
-
-	inline size_t __deque_buf_size(size_t n, size_t sz) {
-		return n != 0 ? n : (sz < 512 ? (512 / sz) : 1);
-	}
-
-	template<class T, size_t BufSiz = 0>
+	template<class T>
 	class deque_iterator {
 
-		template<class T,size_t BufSize = 0>
+		template<class T>
 		friend class deque_iterator;
 	public:		
 		//iterator typedefs
@@ -39,8 +34,8 @@ namespace detail {
 		using element_type = typename remove_const<T>::value;
 		using map_pointer = element_type * *;
 
-		static size_t buf_size() {
-			return __deque_buf_size(BufSiz, sizeof(T));
+		constexpr static size_t buf_size()const {
+			return sizeof(T) <= 512 ? 512 / sizeof(T) : 1;
 		}
 
 		element_type* cur;
@@ -180,11 +175,13 @@ private:
 	//缓冲区管控
 	map_pointer map;
 	size_type map_size;
+	size_type data_size;
 
+	Allocator data_alloc;
 public:
 
 	deque()
-		: start(), finish(), map(nullptr), map_size(0) {}
+		: start(), finish(), map(nullptr), map_size(0), data_size(0) {}
 
 
 	explicit deque(const Allocator& alloc);
