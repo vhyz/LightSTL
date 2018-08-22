@@ -132,7 +132,7 @@ private:
 
 	void destory_node(node* n) {
 		data_alloc.destory(n);
-		data_alloc.deallocate(n);
+		data_alloc.deallocate(n, 1);
 	}
 
 	void empty_init() {
@@ -277,7 +277,7 @@ public:
 	//析构函数
 	~list() {
 		free_nodes();
-		data_alloc.deallocate(_node);
+		data_alloc.deallocate(_node,1);
 	}
 
 

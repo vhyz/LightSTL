@@ -40,7 +40,7 @@ public:
 		return (T*)::operator new(n * sizeof(T));
 	}
 
-	static void deallocate(T* ptr) {
+	static void deallocate(T* ptr, size_t) {
 		::operator delete (ptr);
 	}
 

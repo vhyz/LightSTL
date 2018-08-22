@@ -39,8 +39,8 @@ private:
 	void _free_data() {
 		if (start) {
 			for (auto i = start; i != finish; ++i)
-				data_alloc.destory(i);
-			data_alloc.deallocate(start);
+				LightSTL::destroy_at(i);
+			data_alloc.deallocate(start, size());
 		}
 	}
 
@@ -96,8 +96,8 @@ private:
 			//若空间不足，申请new_size的空间
 			T* p = data_alloc.allocate(new_size);
 			auto new_pos = uninitialized_move(start, old_pos, p);
-			uninitialized_copy(first, last, new_pos);
-			uninitialized_move(old_pos, finish, new_pos + dis);
+			iterator res = uninitialized_copy(first, last, new_pos);
+			uninitialized_move(old_pos, finish, res);
 			_free_data();
 			start = p;
 			finish = end_of_storage = p + new_size;
@@ -112,9 +112,54 @@ private:
 
 	}
 
+	iterator insert_aux_n(const_iterator pos, size_type n, const T& value) {
+		size_type pos_dis = pos - start, len = size();
+		size_type new_size = n + len;
+		iterator old_pos = const_cast<iterator>(pos);
+		if (new_size > capacity()) {
+
+			iterator p = data_alloc.allocate(new_size);
+			iterator new_pos = uninitialized_move(start, old_pos, p);
+			iterator res = uninitialized_fill_n(new_pos, n, value);
+			uninitialized_move(old_pos, finish, res);
+			_free_data();
+			start = p;
+			finish = end_of_storage = p + new_size;
+			return new_pos;
+		} else {
+
+			move_safe(old_pos, finish, old_pos + n);
+			uninitialized_fill_n(old_pos, n, value);
+			finish += n;
+			return old_pos;
+		}
+	}
+
+	iterator insert_aux_n_default(const_iterator pos, size_type n) {
+		size_type pos_dis = pos - start, len = size();
+		size_type new_size = n + len;
+		iterator old_pos = const_cast<iterator>(pos);
+		if (new_size > capacity()) {
+
+			iterator p = data_alloc.allocate(new_size);
+			iterator new_pos = uninitialized_move(start, old_pos, p);
+			iterator res = uninitialized_default_construct_n(new_pos, n);
+			uninitialized_move(old_pos, finish, res);
+			_free_data();
+			start = p;
+			finish = end_of_storage = p + new_size;
+			return new_pos;
+		} else {
+
+			move_safe(old_pos, finish, old_pos + n);
+			uninitialized_default_construct_n(old_pos, n);
+			finish += n;
+			return old_pos;
+		}
+	}
 	template<class... Args>
 	iterator insert_aux_args(const_iterator pos, Args&&... args) {
-		auto pos_dis = pos - start;
+		size_type pos_dis = pos - start;
 		size_type len = size();
 		iterator old_pos = const_cast<iterator>(pos);
 		if (finish == end_of_storage) {
@@ -127,13 +172,16 @@ private:
 			start = p;
 			finish = new_finish;
 			end_of_storage = p + new_size;
+			return new_pos;
 		} else {
 			uninitialized_move(old_pos, finish, old_pos + 1);
 			finish++;
 			data_alloc.construct(old_pos, std::forward<Args>(args)...);
+			return old_pos;
 		}
-		return start + pos_dis;
 	}
+
+
 public:
 
 	vector()
@@ -237,6 +285,7 @@ public:
 		finish = end_of_storage = res.second;
 	}
 
+
 public:
 	//容量
 	size_type size()const { return finish - start;}
@@ -329,7 +378,10 @@ public:
 		return insert_aux_args(pos, value);
 	}
 	iterator insert(const_iterator pos, size_type count, const T& value) {
-		
+		return insert_aux_n(pos, count, value);
+	}
+	iterator insert(const_iterator pos, size_type count) {
+		return insert_aux_n_default(pos, count);
 	}
 	template< class InputIt >
 	iterator insert(const_iterator pos, InputIt first, InputIt last) {

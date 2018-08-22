@@ -33,9 +33,9 @@ namespace TEST_allocator {
 		alloc.destory(p1);
 		alloc.destory(p2);
 		alloc.destory(p3);
-		alloc.deallocate(p1);
-		alloc.deallocate(p2);
-		alloc.deallocate(p3);
+		alloc.deallocate(p1,1);
+		alloc.deallocate(p2,1);
+		alloc.deallocate(p3,1);
 	}
 
 

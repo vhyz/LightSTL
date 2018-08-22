@@ -41,8 +41,8 @@ namespace test {
 		Bar* lhs = begin, *rhs = begin2;
 		for (size_t i = 0; i < cap; ++i)
 			assert(*lhs++ == *rhs++);
-		alloc.deallocate(begin);
-		alloc.deallocate(begin2);
+		alloc.deallocate(begin,1);
+		alloc.deallocate(begin2,1);
 	}
 	void test_uninitialized_storage() {
 		std::cout << "test_uninitialized_storage.hpp\n";

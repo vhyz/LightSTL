@@ -7,6 +7,7 @@
 #include<ctime>
 #include<vector>
 #include<string>
+#include<memory>
 
 namespace test {
 	class A {

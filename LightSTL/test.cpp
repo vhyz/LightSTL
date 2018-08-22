@@ -7,7 +7,6 @@
 #include<memory>
 
 int main() {
-	std::deque<int>::iterator;
 	addressof_test();
 	test::test_uninitialized_storage();
 	test::test_vector();
