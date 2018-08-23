@@ -393,18 +393,18 @@ public:
 
 	template< class... Args >
 	iterator emplace(const_iterator pos, Args&&... args) {
-		insert_aux_args(pos, std::forward<Args>(args)...);
+		return insert_aux_args(pos, std::forward<Args>(args)...);
 	}
 	iterator erase(const_iterator pos) {
-		erase(pos, pos + 1);
+		return erase(pos, pos + 1);
 	}
 	iterator erase(const_iterator first, const_iterator last) {
 		for (; first < last; ++first)
 			first->~T();
 		if (last != finish)
-			finish = LightSTL::uninitialized_move(last, finish, first);
+			finish = LightSTL::uninitialized_move(const_cast<iterator>(last), finish, const_cast<iterator>(first));
 		else
-			finish = first;
+			finish = const_cast<iterator>(first);
 	}
 
 	void push_back(const T& value) {

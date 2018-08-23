@@ -21,6 +21,9 @@ namespace detail {
 	template<class T>
 	class deque_iterator {
 
+		template<class Y, class Allocator = LightSTL::allocator<Y> >
+		friend class deque;
+
 		template<class T>
 		friend class deque_iterator;
 	public:		
@@ -51,14 +54,14 @@ namespace detail {
 	public:
 
 		deque_iterator()
-			: cur(nullptr), first(nullptr), last(nullptr),node(nullptr) {}
+			: cur(nullptr), first(nullptr), last(nullptr), node(nullptr) {}
 
 		template<class Y>
-		deque_iterator(const deque_iterator<Y,BufSiz>& other )
+		deque_iterator(const deque_iterator<Y>& other )
 			: cur(other.cur), first(other.first), last(other.last), node(other.node)  {}
 
 		template<class Y>
-		deque_iterator& operator=(const deque_iterator<Y, BufSiz>& other) {
+		deque_iterator& operator=(const deque_iterator<Y>& other) {
 			cur = other.cur;
 			first = other.first;
 			last = other.last;
@@ -175,16 +178,30 @@ private:
 	//缓冲区管控
 	map_pointer map;
 	size_type map_size;
-	size_type data_size;
 
 	Allocator data_alloc;
 public:
 
 	deque()
-		: start(), finish(), map(nullptr), map_size(0), data_size(0) {}
+		: map(nullptr),map_size(0),data_alloc() {}
 
+	explicit deque(const Allocator& alloc)
+		: map(nullptr),map_size(0),data_alloc(alloc) {}
 
-	explicit deque(const Allocator& alloc);
+	deque(size_type count,
+		const T& value,
+		const Allocator& alloc = Allocator());
+
+	explicit deque(size_type count, const Allocator& alloc = Allocator());
+	template< class InputIt >
+	deque(InputIt first, InputIt last,
+		const Allocator& alloc = Allocator());
+	deque(const deque& other);
+	deque(const deque& other, const Allocator& alloc);
+	deque(deque&& other);
+	deque(deque&& other, const Allocator& alloc);
+	deque(std::initializer_list<T> init,
+		const Allocator& alloc = Allocator());
 };
 
 
