@@ -37,8 +37,6 @@ namespace TEST_allocator {
 		alloc.deallocate(p2,1);
 		alloc.deallocate(p3,1);
 	}
-
-
 }
 
 #endif // !TEST_ALLOCATOR_HPP

@@ -6,6 +6,9 @@
 #include"memory/allocator.hpp"
 #include"iterator/iterator.hpp"
 #include"memory/addressof.hpp"
+#include<memory>
+
+
 
 namespace LightSTL {
 
@@ -101,7 +104,7 @@ namespace detail {
 	}
 }
 
-template<class T,class Allocator = LightSTL::allocator<detail::node<T>> >
+template<class T,class Allocator = LightSTL::allocator<T> >
 class list {
 
 public:
@@ -122,6 +125,7 @@ public:
 private:
 
 	using node = detail::node<T>;
+	using node_allocator = typename Allocator::rebind<node>::other;
 
 	template<class... Args>
 	node* create_node(Args&&... args) {
@@ -136,7 +140,7 @@ private:
 	}
 
 	void empty_init() {
-		_node = data_alloc.allocate();
+		_node = data_alloc.allocate(1);
 		_node->next = _node;
 		_node->prev = _node;
 		_size = 0;
@@ -156,7 +160,7 @@ private:
 
 	node* _node;
 	size_type _size;
-	LightSTL::allocator<detail::node<T>> data_alloc;
+	node_allocator data_alloc;
 
 private:
 	//四种插入辅助函数

@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClInclude Include="array.hpp" />
     <ClInclude Include="deque.hpp" />
+    <ClInclude Include="forward_list.hpp" />
     <ClInclude Include="iterator\iterator.hpp" />
     <ClInclude Include="iterator\iterator_traits.hpp" />
     <ClInclude Include="list.hpp" />

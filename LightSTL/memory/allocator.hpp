@@ -26,7 +26,7 @@ public:
 	template<typename U>
 	allocator(const allocator<U>& other) noexcept {};
 	~allocator() {}
-
+	
 	static T* address(T& x) {
 		return addressof(x);
 	}

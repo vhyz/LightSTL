@@ -1,6 +1,8 @@
 ﻿#ifndef DEQUE_HPP
 #define DEQUE_HPP
 
+//本文件待完成
+
 
 #include"iterator/iterator.hpp"
 #include"memory/allocator.hpp"
