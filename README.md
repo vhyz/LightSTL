@@ -30,4 +30,12 @@ LightSTL是学习STL时根据C++标准与侯捷的《STL源码剖析》写的简
 
 ## vector
 
-* vector主体
+* vector
+
+## array
+
+* array
+
+## list
+
+~list
